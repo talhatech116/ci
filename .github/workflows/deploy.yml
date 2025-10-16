@@ -20,13 +20,13 @@ jobs:
         with:
           node-version: 20
 
-      # Step 3: Install and build React frontend
+      # Step 3: Install and build React frontend with Vite
       - name: 🧱 Build React frontend
         working-directory: ./resources/js
         run: |
           npm install
-          # Force a clean build
-          npm run build -- --dest ../public/build
+          # Correct Vite build command
+          npm run build
           echo "✅ React build completed"
           echo "📁 Build files:"
           ls -la ../public/build/
@@ -36,8 +36,8 @@ jobs:
         run: |
           echo "Checking public/build directory:"
           ls -la public/build/
-          echo "Static files:"
-          ls -la public/build/static/
+          echo "Built files:"
+          ls -la public/build/assets/
 
       # Step 5: Deploy to FTP
       - name: 🚀 Deploy to FTP
