@@ -27,98 +27,48 @@ jobs:
           npm install
           npm run build
 
-      # Step 4: Read the Vite manifest to get dynamic filenames
-      - name: 🔍 Read Vite Manifest
-        id: vite-manifest
+      # Step 4: Find the built JS file
+      - name: 🔍 Find Built JS File
+        id: find-js
         run: |
-          echo "=== Reading Vite Manifest ==="
-          MANIFEST_FILE="public/build/.vite/manifest.json"
-          
-          if [ -f "$MANIFEST_FILE" ]; then
-            echo "Manifest file found:"
-            cat $MANIFEST_FILE
-            
-            # Extract the main JS file
-            JS_FILE=$(jq -r '.["resources/js/app.jsx"].file' $MANIFEST_FILE)
-            echo "Main JS file: $JS_FILE"
-            echo "js_file=$JS_FILE" >> $GITHUB_OUTPUT
-            
-            # Extract CSS files if any
-            CSS_FILES=$(jq -r '.["resources/js/app.jsx"].css[]? // empty' $MANIFEST_FILE)
-            echo "CSS files: $CSS_FILES"
-            echo "css_files=$CSS_FILES" >> $GITHUB_OUTPUT
-            
-          else
-            echo "❌ Manifest file not found!"
-            # Fallback: find the JS file manually
-            JS_FILE=$(find public/build/assets -name "app-*.js" | head -1)
-            JS_FILE=$(basename $JS_FILE)
-            echo "Fallback JS file: $JS_FILE"
-            echo "js_file=$JS_FILE" >> $GITHUB_OUTPUT
-          fi
+          JS_FILE=$(find public/build/assets -name "app-*.js" | head -1)
+          JS_FILENAME=$(basename "$JS_FILE")
+          echo "Found JS file: $JS_FILENAME"
+          echo "js_file=$JS_FILENAME" >> $GITHUB_OUTPUT
 
       # Step 5: Create dynamic Blade file
       - name: 🔧 Create Dynamic Blade File
         run: |
           BLADE_FILE="resources/views/welcome.blade.php"
-          JS_FILENAME="${{ steps.vite-manifest.outputs.js_file }}"
-          CSS_FILES="${{ steps.vite-manifest.outputs.css_files }}"
+          JS_FILENAME="${{ steps.find-js.outputs.js_file }}"
           
-          echo "Creating Blade file with JS: $JS_FILENAME"
-          echo "CSS files: $CSS_FILES"
-          
-          # Start building the Blade file
-          cat > $BLADE_FILE << EOF
+          cat > "$BLADE_FILE" << EOL
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Your App</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-EOF
-
-          # Add CSS links if they exist
-          if [ ! -z "$CSS_FILES" ]; then
-            echo "$CSS_FILES" | while read -r css_file; do
-              if [ ! -z "$css_file" ]; then
-                echo "    <link rel=\"stylesheet\" href=\"/build/$css_file\">" >> $BLADE_FILE
-              fi
-            done
-          fi
-
-          # Close head and add body with JS
-          cat >> $BLADE_FILE << EOF
 </head>
 <body>
     <div id="app"></div>
-    
-    <!-- Load the built JavaScript -->
-    <script type="module" src="/build/$JS_FILENAME"></script>
+    <script type="module" src="/build/assets/$JS_FILENAME"></script>
 </body>
 </html>
-EOF
-
-          echo "✅ Dynamic Blade file created!"
-          echo "=== Final Blade file content ==="
-          cat $BLADE_FILE
+EOL
+          echo "✅ Dynamic Blade file created with JS: $JS_FILENAME"
 
       # Step 6: Setup PHP
       - name: 🧩 Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          tools: composer
 
       # Step 7: Install Composer
       - name: 📦 Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      # Step 8: Install jq for JSON parsing (if not already available)
-      - name: 📦 Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      # Step 9: Deploy
+      # Step 8: Deploy
       - name: 🚀 Deploy to FTP
         uses: SamKirkland/FTP-Deploy-Action@4.3.5
         with:
@@ -136,13 +86,9 @@ EOF
             **/.env.example
             **/README.md
 
-      # Step 10: Final instructions
+      # Step 9: Final instructions
       - name: ✅ Deployment Complete
         run: |
-          echo "🚀 Dynamic deployment finished!"
-          echo " "
-          echo "📁 Built files:"
-          echo "JS: ${{ steps.vite-manifest.outputs.js_file }}"
-          echo "CSS: ${{ steps.vite-manifest.outputs.css_files }}"
-          echo " "
+          echo "🚀 Deployment finished!"
+          echo "Loaded JS file: ${{ steps.find-js.outputs.js_file }}"
           echo "🔄 Force refresh your browser (Ctrl+Shift+R)"
