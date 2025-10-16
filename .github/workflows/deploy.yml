@@ -19,4 +19,4 @@ jobs:
           username: askftp@asktechnologies.net
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
-          server-dir: /home/asktvfcz/test.asktechnologies.net/
+          server-dir: /test.asktechnologies.net/
