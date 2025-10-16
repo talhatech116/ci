@@ -26,35 +26,45 @@ jobs:
           cd resources/js
           npm install
           npm run build
-        # This will use the fixed vite.config.js in project root
 
-      # Step 4: Verify the build
-      - name: 🔍 Verify Build Output
-        run: |
-          echo "✅ Build completed - checking files:"
-          ls -la public/build/ || echo "❌ Build directory not found"
-          echo "📁 Checking for built assets:"
-          ls -la public/build/assets/ 2>/dev/null || echo "No assets directory yet"
-
-      # Step 5: Setup PHP for Laravel
+      # Step 4: Setup PHP for Laravel
       - name: 🧩 Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
+          extensions: mysqli, pdo, pdo_mysql
+          tools: composer
 
-      # Step 6: Install Composer dependencies
+      # Step 5: Create production .env file
+      - name: 🔧 Setup Environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      # Step 6: Configure MySQL Database
+      - name: 🗄️ Setup Database Configuration
+        run: |
+          # Replace database configuration in .env
+          sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env
+          sed -i 's/DB_HOST=.*/DB_HOST=localhost/' .env
+          sed -i 's/DB_PORT=.*/DB_PORT=3306/' .env
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=asktvfcz_ci/' .env
+          sed -i 's/DB_USERNAME=.*/DB_USERNAME=asktvfcz_ci/' .env
+          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=asktvfcz_ci/' .env
+
+      # Step 7: Install Composer dependencies
       - name: 📦 Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      # Step 7: Clear Laravel caches
-      - name: 🗑️ Clear Laravel Caches
+      # Step 8: Skip cache clearing (since we don't have DB in CI)
+      - name: 🗑️ Clear Non-Database Caches
         run: |
           php artisan config:clear
-          php artisan cache:clear
           php artisan view:clear
           php artisan route:clear
+          # Skip: php artisan cache:clear (requires database)
 
-      # Step 8: Deploy to FTP
+      # Step 9: Deploy to FTP
       - name: 🚀 Deploy to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -77,11 +87,8 @@ jobs:
             **/README.md
             **/resources/js/node_modules/
 
-      # Step 9: Post-deployment check
+      # Step 10: Post-deployment check
       - name: ✅ Deployment Complete
         run: |
           echo "🚀 Deployment finished!"
-          echo "📝 If changes aren't showing, try:"
-          echo "   - Hard refresh (Ctrl+F5)"
-          echo "   - Clear browser cache"
-          echo "   - Check browser console for errors"
+          echo "📝 Database configuration has been set for MySQL"
