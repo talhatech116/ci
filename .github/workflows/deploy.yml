@@ -3,7 +3,7 @@ name: 🚀 Deploy Laravel + React to Namecheap via FTP
 on:
   push:
     branches:
-      - main   # deploy whenever you push to main
+      - main
 
 jobs:
   deploy:
@@ -37,8 +37,16 @@ jobs:
       - name: 📦 Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      # Step 6: Deploy Laravel + React to FTP root
-      - name: 🚀 Deploy Laravel + React build to FTP root
+      # Step 6: Create .env file if it doesn't exist (adjust variables as needed)
+      - name: 🔧 Create production .env
+        run: |
+          if [ ! -f .env ]; then
+            cp .env.example .env
+            php artisan key:generate
+          fi
+
+      # Step 7: Deploy to the correct FTP directory
+      - name: 🚀 Deploy to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ftp.asktechnologies.net
@@ -47,8 +55,8 @@ jobs:
           port: 21
           protocol: ftp
           passive: true
-          local-dir: ./          # deploy everything from repo root
-          server-dir: /          # FTP root (your test.asktechnologies.net)
+          local-dir: ./
+          server-dir: /home/   # ← CHANGED: Deploy to /home/ instead of root
           state-name: .ftp-deploy-sync-state.json
           exclude: |
             **/.git*
@@ -56,19 +64,6 @@ jobs:
             **/node_modules/**
             **/vendor/**
             **/storage/**
-            **/.env
+            **/.env.example
             **/README.md
-
-      # Step 7: Upload React build folder to /public/build
-      - name: 📂 Upload React Build Folder
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ftp.asktechnologies.net
-          username: askftp@asktechnologies.net
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 21
-          protocol: ftp
-          passive: true
-          local-dir: ./public/build/
-          server-dir: /public/build/
-          state-name: .ftp-deploy-build-state.json
+            **/resources/js/node_modules/
