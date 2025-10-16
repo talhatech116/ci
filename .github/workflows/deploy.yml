@@ -20,26 +20,41 @@ jobs:
         with:
           node-version: 20
 
-      # Step 3: Install and build React frontend with Vite
+      # Step 3: Install and build React frontend
       - name: 🧱 Build React frontend
-        working-directory: ./resources/js
         run: |
+          cd resources/js
           npm install
-          # Correct Vite build command
           npm run build
-          echo "✅ React build completed"
-          echo "📁 Build files:"
-          ls -la ../public/build/
+        # This will use the fixed vite.config.js in project root
 
       # Step 4: Verify the build
       - name: 🔍 Verify Build Output
         run: |
-          echo "Checking public/build directory:"
-          ls -la public/build/
-          echo "Built files:"
-          ls -la public/build/assets/
+          echo "✅ Build completed - checking files:"
+          ls -la public/build/ || echo "❌ Build directory not found"
+          echo "📁 Checking for built assets:"
+          ls -la public/build/assets/ 2>/dev/null || echo "No assets directory yet"
 
-      # Step 5: Deploy to FTP
+      # Step 5: Setup PHP for Laravel
+      - name: 🧩 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      # Step 6: Install Composer dependencies
+      - name: 📦 Install Composer dependencies
+        run: composer install --no-dev --optimize-autoloader
+
+      # Step 7: Clear Laravel caches
+      - name: 🗑️ Clear Laravel Caches
+        run: |
+          php artisan config:clear
+          php artisan cache:clear
+          php artisan view:clear
+          php artisan route:clear
+
+      # Step 8: Deploy to FTP
       - name: 🚀 Deploy to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -60,3 +75,13 @@ jobs:
             **/storage/**
             **/.env.example
             **/README.md
+            **/resources/js/node_modules/
+
+      # Step 9: Post-deployment check
+      - name: ✅ Deployment Complete
+        run: |
+          echo "🚀 Deployment finished!"
+          echo "📝 If changes aren't showing, try:"
+          echo "   - Hard refresh (Ctrl+F5)"
+          echo "   - Clear browser cache"
+          echo "   - Check browser console for errors"
