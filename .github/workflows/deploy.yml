@@ -3,7 +3,7 @@ name: 🚀 Deploy Laravel + React to Namecheap via FTP
 on:
   push:
     branches:
-      - main   # or master, if your default branch is master
+      - main   # or master if your default branch is master
 
 jobs:
   deploy:
@@ -37,18 +37,18 @@ jobs:
       - name: 📦 Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      # Step 6: Upload Laravel app to Namecheap via FTP
-      - name: 🚀 Deploy Laravel + React build to Namecheap
+      # Step 6: Upload Laravel app (excluding vendor/node_modules)
+      - name: 🚀 Deploy Laravel + React build
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
+          server: ftp.asktechnologies.net
+          username: askftp@asktechnologies.net
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
           protocol: ftp
           passive: true
-          local-dir: ./          # everything from project root
-          server-dir: /home/asktvfcz/test.asktechnologies.net/
+          local-dir: ./                # Upload everything from repo root
+          server-dir: ./               # Root of your FTP (points to test.asktechnologies.net)
           state-name: .ftp-deploy-sync-state.json
           exclude: |
             **/.git*
@@ -63,12 +63,12 @@ jobs:
       - name: 📂 Upload React Build Folder
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
+          server: ftp.asktechnologies.net
+          username: askftp@asktechnologies.net
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
           protocol: ftp
           passive: true
           local-dir: ./public/build/
-          server-dir: /home/asktvfcz/test.asktechnologies.net/public/build/
+          server-dir: ./public/build/
           state-name: .ftp-deploy-build-state.json
