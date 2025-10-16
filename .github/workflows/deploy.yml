@@ -1,4 +1,4 @@
-name: 🚀 Simple File Deployment
+name: 🚀 Deploy to Correct Web Root
 
 on:
   push:
@@ -12,11 +12,11 @@ jobs:
       - name: 🧾 Checkout code
         uses: actions/checkout@v3
 
-      - name: 🚀 Deploy Files via FTP
+      - name: 🚀 Deploy to ACTUAL Web Root
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ftp.asktechnologies.net
           username: askftp@asktechnologies.net
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
-          server-dir: /home/
+          server-dir: /home/asktvfcz/test.asktechnologies.net/  # ← CORRECT PATH!
