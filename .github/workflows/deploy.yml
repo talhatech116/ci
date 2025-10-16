@@ -37,11 +37,11 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      # Step 6: Deploy to Namecheap via FTP
-      - name: 📦 Upload to FTP Server
+      # Step 6: Deploy Laravel app to Namecheap
+      - name: 📦 Upload Laravel to FTP Server
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_HOST }}
+          server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: ${{ secrets.FTP_PORT }}
@@ -57,11 +57,11 @@ jobs:
             **/.env
             **/README.md
 
-      # Step 7: Upload build folder separately
+      # Step 7: Upload React build folder
       - name: 📂 Upload React Build Folder
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_HOST }}
+          server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: ${{ secrets.FTP_PORT }}
