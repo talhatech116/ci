@@ -1,4 +1,4 @@
-name: 🚀 Deploy Laravel + React to Namecheap via FTP
+name: 🚀 Simple Deploy to Server
 
 on:
   push:
@@ -10,61 +10,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout
+      # Step 1: Checkout code
       - name: 🧾 Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Setup Node
-      - name: ⚙️ Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-
-      # Step 3: Build React
-      - name: 🧱 Build React frontend
-        run: |
-          cd resources/js
-          npm install
-          npm run build
-          echo "✅ React build completed"
-          echo "📁 Build files created:"
-          ls -la ../public/build/
-
-      # Step 4: Verify build files exist
-      - name: 🔍 Verify Build Files
-        run: |
-          echo "Checking build directory:"
-          ls -la public/build/
-          echo "Build should be in public/build/"
-
-      # Step 5: Setup PHP
-      - name: 🧩 Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-
-      # Step 6: Install Composer
-      - name: 📦 Install Composer dependencies
-        run: composer install --no-dev --optimize-autoloader
-
-      # Step 7: Deploy (CRITICAL FIX - No exclude for build files)
+      # Step 2: Deploy ALL files directly
       - name: 🚀 Deploy to FTP
-        uses: SamKirkland/FTP-Deploy-Action@4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ftp.asktechnologies.net
           username: askftp@asktechnologies.net
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
           server-dir: /home/
-          # REMOVED the exclude section entirely for now
-          # Or use a minimal exclude:
-          exclude: |
-            **/.git*
-            **/.github*
-            **/node_modules/**
-
-      # Step 8: Final verification
-      - name: ✅ Deployment Complete
-        run: |
-          echo "🚀 Deployment finished!"
-          echo "📝 Check if build files were uploaded to server"
