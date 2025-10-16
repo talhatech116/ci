@@ -1,0 +1,70 @@
+name: 🚀 Deploy Laravel + React to Namecheap via FTP
+
+on:
+  push:
+    branches:
+      - main   # or master, if you use master branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Setup Node.js (for React build)
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      # Step 3: Install and build React
+      - name: Build React frontend
+        working-directory: ./resources/js
+        run: |
+          npm install
+          npm run build
+
+      # Step 4: Setup PHP (for Laravel)
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      # Step 5: Install Composer dependencies
+      - name: Install Composer dependencies
+        run: composer install --no-dev --optimize-autoloader
+
+      # Step 6: Deploy to Namecheap via FTP
+      - name: 📦 Upload to FTP Server
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT }}
+          protocol: ftps
+          local-dir: ./  # everything in the repo root
+          server-dir: /home/asktvfcz/test.asktechnologies.net/
+          exclude: |
+            **/.git*
+            **/.github*
+            **/node_modules/**
+            **/vendor/**
+            **/storage/**
+            **/.env
+            **/README.md
+
+      # Step 7: Upload build folder separately
+      - name: 📂 Upload React Build Folder
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT }}
+          protocol: ftps
+          local-dir: ./public/build/
+          server-dir: /home/asktvfcz/test.asktechnologies.net/public/build/
