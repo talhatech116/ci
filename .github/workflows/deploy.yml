@@ -14,30 +14,53 @@ jobs:
       - name: 🧾 Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Setup Node.js for React build
+      # Step 2: Debug - Show current app.jsx content
+      - name: 🔍 Debug - Check Current App.jsx
+        run: |
+          echo "=== Current app.jsx content ==="
+          cat resources/js/app.jsx
+          echo "=== End of app.jsx ==="
+
+      # Step 3: Setup Node.js for React build
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
 
-      # Step 3: Install and build React frontend
+      # Step 4: Install and build React frontend
       - name: 🧱 Build React frontend
         run: |
           cd resources/js
           npm install
           npm run build
+          echo "✅ React build completed"
 
-      # Step 4: Setup PHP for Laravel
+      # Step 5: Debug - Verify build output
+      - name: 🔍 Debug - Verify Build Files
+        run: |
+          echo "=== Checking if build directory exists ==="
+          ls -la public/ | grep build || echo "No build directory found"
+          
+          echo "=== Build directory contents ==="
+          ls -la public/build/ 2>/dev/null || echo "Cannot access build directory"
+          
+          echo "=== Built JavaScript files ==="
+          find public/build -name "*.js" -type f 2>/dev/null | head -10 || echo "No JS files found"
+          
+          echo "=== Manifest file (if exists) ==="
+          cat public/build/manifest.json 2>/dev/null || echo "No manifest file"
+
+      # Step 6: Setup PHP for Laravel
       - name: 🧩 Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
 
-      # Step 5: Install Composer dependencies FIRST
+      # Step 7: Install Composer dependencies FIRST
       - name: 📦 Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      # Step 6: Create .env file (AFTER composer install)
+      # Step 8: Create .env file (AFTER composer install)
       - name: 🔧 Setup Environment
         run: |
           cp .env.example .env
@@ -45,7 +68,7 @@ jobs:
           sed -i 's/APP_DEBUG=.*/APP_DEBUG=false/' .env
           sed -i 's/APP_ENV=.*/APP_ENV=production/' .env
 
-      # Step 7: Skip all artisan commands that need database
+      # Step 9: Deploy to FTP
       - name: 🚀 Deploy to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -68,11 +91,22 @@ jobs:
             **/README.md
             **/resources/js/node_modules/
 
-      # Step 8: Final message
-      - name: ✅ Deployment Complete
+      # Step 10: Final debug instructions
+      - name: ✅ Deployment Debug Complete
         run: |
           echo "🚀 Deployment finished!"
-          echo "📝 Manual steps needed on server:"
-          echo "   1. Set correct MySQL credentials in .env"
-          echo "   2. Run: php artisan config:cache"
-          echo "   3. Run: php artisan view:cache"
+          echo " "
+          echo "🔍 DEBUG INSTRUCTIONS:"
+          echo "1. Check GitHub Actions logs above for:"
+          echo "   - Your current app.jsx content"
+          echo "   - If build files were created"
+          echo "   - What JS files were built"
+          echo " "
+          echo "2. After deployment, manually check:"
+          echo "   - FTP: /home/resources/js/app.jsx - is it updated?"
+          echo "   - FTP: /home/public/build/ - are there new files?"
+          echo " "
+          echo "3. Browser steps:"
+          echo "   - Hard refresh: Ctrl+Shift+R"
+          echo "   - Check Console for errors (F12)"
+          echo "   - Check Network tab for loaded JS files"
