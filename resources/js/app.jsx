@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client';
 function App() {
   return (
     <div style={{ textAlign: 'center', marginTop: '100px' }}>
-      <h1>Hello from Automated Deployment Works 🎉</h1>
+      <h1>Test Automated Deployment Works 🎉</h1>
       <p>This React component is rendered within a Blade view.</p>
     </div>
   );
