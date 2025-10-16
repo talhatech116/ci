@@ -26,49 +26,28 @@ jobs:
           cd resources/js
           npm install
           npm run build
+          echo "✅ React build completed"
+          echo "📁 Build files created:"
+          ls -la ../public/build/
 
-      # Step 4: Find the built JS file
-      - name: 🔍 Find Built JS File
-        id: find-js
+      # Step 4: Verify build files exist
+      - name: 🔍 Verify Build Files
         run: |
-          JS_FILE=$(find public/build/assets -name "app-*.js" | head -1)
-          JS_FILENAME=$(basename "$JS_FILE")
-          echo "Found JS file: $JS_FILENAME"
-          echo "js_file=$JS_FILENAME" >> $GITHUB_OUTPUT
+          echo "Checking build directory:"
+          ls -la public/build/
+          echo "Build should be in public/build/"
 
-      # Step 5: Create dynamic Blade file
-      - name: 🔧 Create Dynamic Blade File
-        run: |
-          BLADE_FILE="resources/views/welcome.blade.php"
-          JS_FILENAME="${{ steps.find-js.outputs.js_file }}"
-          
-          cat > "$BLADE_FILE" << EOL
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Your App</title>
-</head>
-<body>
-    <div id="app"></div>
-    <script type="module" src="/build/assets/$JS_FILENAME"></script>
-</body>
-</html>
-EOL
-          echo "✅ Dynamic Blade file created with JS: $JS_FILENAME"
-
-      # Step 6: Setup PHP
+      # Step 5: Setup PHP
       - name: 🧩 Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
 
-      # Step 7: Install Composer
+      # Step 6: Install Composer
       - name: 📦 Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      # Step 8: Deploy
+      # Step 7: Deploy (CRITICAL FIX - No exclude for build files)
       - name: 🚀 Deploy to FTP
         uses: SamKirkland/FTP-Deploy-Action@4.3.5
         with:
@@ -77,18 +56,15 @@ EOL
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
           server-dir: /home/
+          # REMOVED the exclude section entirely for now
+          # Or use a minimal exclude:
           exclude: |
             **/.git*
             **/.github*
             **/node_modules/**
-            **/vendor/**
-            **/storage/**
-            **/.env.example
-            **/README.md
 
-      # Step 9: Final instructions
+      # Step 8: Final verification
       - name: ✅ Deployment Complete
         run: |
           echo "🚀 Deployment finished!"
-          echo "Loaded JS file: ${{ steps.find-js.outputs.js_file }}"
-          echo "🔄 Force refresh your browser (Ctrl+Shift+R)"
+          echo "📝 Check if build files were uploaded to server"
