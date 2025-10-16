@@ -1,4 +1,4 @@
-name: 🚀 Simple Deploy to Server
+name: 🚀 Simple File Deployment
 
 on:
   push:
@@ -8,14 +8,11 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      # Step 1: Checkout code
-      - name: 🧾 Checkout repository
+      - name: 🧾 Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Deploy ALL files directly
-      - name: 🚀 Deploy to FTP
+      - name: 🚀 Deploy Files via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ftp.asktechnologies.net
