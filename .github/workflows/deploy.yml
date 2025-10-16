@@ -32,39 +32,20 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: mysqli, pdo, pdo_mysql
-          tools: composer
 
-      # Step 5: Create production .env file
-      - name: 🔧 Setup Environment
-        run: |
-          cp .env.example .env
-          php artisan key:generate
-
-      # Step 6: Configure MySQL Database
-      - name: 🗄️ Setup Database Configuration
-        run: |
-          # Replace database configuration in .env
-          sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env
-          sed -i 's/DB_HOST=.*/DB_HOST=localhost/' .env
-          sed -i 's/DB_PORT=.*/DB_PORT=3306/' .env
-          sed -i 's/DB_DATABASE=.*/DB_DATABASE=asktvfcz_ci/' .env
-          sed -i 's/DB_USERNAME=.*/DB_USERNAME=asktvfcz_ci/' .env
-          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=asktvfcz_ci/' .env
-
-      # Step 7: Install Composer dependencies
+      # Step 5: Install Composer dependencies FIRST
       - name: 📦 Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      # Step 8: Skip cache clearing (since we don't have DB in CI)
-      - name: 🗑️ Clear Non-Database Caches
+      # Step 6: Create .env file (AFTER composer install)
+      - name: 🔧 Setup Environment
         run: |
-          php artisan config:clear
-          php artisan view:clear
-          php artisan route:clear
-          # Skip: php artisan cache:clear (requires database)
+          cp .env.example .env
+          # Set basic config without database operations
+          sed -i 's/APP_DEBUG=.*/APP_DEBUG=false/' .env
+          sed -i 's/APP_ENV=.*/APP_ENV=production/' .env
 
-      # Step 9: Deploy to FTP
+      # Step 7: Skip all artisan commands that need database
       - name: 🚀 Deploy to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -87,8 +68,11 @@ jobs:
             **/README.md
             **/resources/js/node_modules/
 
-      # Step 10: Post-deployment check
+      # Step 8: Final message
       - name: ✅ Deployment Complete
         run: |
           echo "🚀 Deployment finished!"
-          echo "📝 Database configuration has been set for MySQL"
+          echo "📝 Manual steps needed on server:"
+          echo "   1. Set correct MySQL credentials in .env"
+          echo "   2. Run: php artisan config:cache"
+          echo "   3. Run: php artisan view:cache"
