@@ -3,7 +3,7 @@ name: 🚀 Deploy Laravel + React to Namecheap via FTP
 on:
   push:
     branches:
-      - main   # change if your branch name is different (e.g. master)
+      - main   # or master, if your default branch is master
 
 jobs:
   deploy:
@@ -11,7 +11,7 @@ jobs:
 
     steps:
       # Step 1: Checkout the repository
-      - name: 🧩 Checkout repository
+      - name: 🧾 Checkout repository
         uses: actions/checkout@v3
 
       # Step 2: Setup Node.js for React build
@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: 20
 
-      # Step 3: Install and build React frontend
+      # Step 3: Install dependencies and build React frontend
       - name: 🧱 Build React frontend
         working-directory: ./resources/js
         run: |
@@ -33,21 +33,23 @@ jobs:
         with:
           php-version: '8.2'
 
-      # Step 5: Install Laravel dependencies
+      # Step 5: Install Composer dependencies
       - name: 📦 Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      # Step 6: Deploy Laravel project to Namecheap via FTP
-      - name: 🚀 Upload Laravel project to FTP
+      # Step 6: Upload Laravel app to Namecheap via FTP
+      - name: 🚀 Deploy Laravel + React build to Namecheap
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          port: ${{ secrets.FTP_PORT }}
-          protocol: ftps
-          local-dir: ./
+          port: 21
+          protocol: ftp
+          passive: true
+          local-dir: ./          # everything from project root
           server-dir: /home/asktvfcz/test.asktechnologies.net/
+          state-name: .ftp-deploy-sync-state.json
           exclude: |
             **/.git*
             **/.github*
@@ -57,14 +59,16 @@ jobs:
             **/.env
             **/README.md
 
-      # Step 7: Upload built React files separately
-      - name: 📂 Upload React build folder
+      # Step 7: Upload React build folder separately to /public/build
+      - name: 📂 Upload React Build Folder
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          port: ${{ secrets.FTP_PORT }}
-          protocol: ftps
+          port: 21
+          protocol: ftp
+          passive: true
           local-dir: ./public/build/
           server-dir: /home/asktvfcz/test.asktechnologies.net/public/build/
+          state-name: .ftp-deploy-build-state.json
