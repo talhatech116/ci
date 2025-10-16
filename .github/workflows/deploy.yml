@@ -10,77 +10,123 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
+      # Step 1: Checkout
       - name: 🧾 Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Debug - Show current app.jsx content
-      - name: 🔍 Debug - Check Current App.jsx
-        run: |
-          echo "=== Current app.jsx content ==="
-          cat resources/js/app.jsx
-          echo "=== End of app.jsx ==="
-
-      # Step 3: Setup Node.js for React build
+      # Step 2: Setup Node
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
 
-      # Step 4: Install and build React frontend
+      # Step 3: Build React
       - name: 🧱 Build React frontend
         run: |
           cd resources/js
           npm install
           npm run build
-          echo "✅ React build completed"
 
-      # Step 5: Debug - Verify build output
-      - name: 🔍 Debug - Verify Build Files
+      # Step 4: Read the Vite manifest to get dynamic filenames
+      - name: 🔍 Read Vite Manifest
+        id: vite-manifest
         run: |
-          echo "=== Checking if build directory exists ==="
-          ls -la public/ | grep build || echo "No build directory found"
+          echo "=== Reading Vite Manifest ==="
+          MANIFEST_FILE="public/build/.vite/manifest.json"
           
-          echo "=== Build directory contents ==="
-          ls -la public/build/ 2>/dev/null || echo "Cannot access build directory"
-          
-          echo "=== Built JavaScript files ==="
-          find public/build -name "*.js" -type f 2>/dev/null | head -10 || echo "No JS files found"
-          
-          echo "=== Manifest file (if exists) ==="
-          cat public/build/manifest.json 2>/dev/null || echo "No manifest file"
+          if [ -f "$MANIFEST_FILE" ]; then
+            echo "Manifest file found:"
+            cat $MANIFEST_FILE
+            
+            # Extract the main JS file
+            JS_FILE=$(jq -r '.["resources/js/app.jsx"].file' $MANIFEST_FILE)
+            echo "Main JS file: $JS_FILE"
+            echo "js_file=$JS_FILE" >> $GITHUB_OUTPUT
+            
+            # Extract CSS files if any
+            CSS_FILES=$(jq -r '.["resources/js/app.jsx"].css[]? // empty' $MANIFEST_FILE)
+            echo "CSS files: $CSS_FILES"
+            echo "css_files=$CSS_FILES" >> $GITHUB_OUTPUT
+            
+          else
+            echo "❌ Manifest file not found!"
+            # Fallback: find the JS file manually
+            JS_FILE=$(find public/build/assets -name "app-*.js" | head -1)
+            JS_FILE=$(basename $JS_FILE)
+            echo "Fallback JS file: $JS_FILE"
+            echo "js_file=$JS_FILE" >> $GITHUB_OUTPUT
+          fi
 
-      # Step 6: Setup PHP for Laravel
+      # Step 5: Create dynamic Blade file
+      - name: 🔧 Create Dynamic Blade File
+        run: |
+          BLADE_FILE="resources/views/welcome.blade.php"
+          JS_FILENAME="${{ steps.vite-manifest.outputs.js_file }}"
+          CSS_FILES="${{ steps.vite-manifest.outputs.css_files }}"
+          
+          echo "Creating Blade file with JS: $JS_FILENAME"
+          echo "CSS files: $CSS_FILES"
+          
+          # Start building the Blade file
+          cat > $BLADE_FILE << EOF
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Your App</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+EOF
+
+          # Add CSS links if they exist
+          if [ ! -z "$CSS_FILES" ]; then
+            echo "$CSS_FILES" | while read -r css_file; do
+              if [ ! -z "$css_file" ]; then
+                echo "    <link rel=\"stylesheet\" href=\"/build/$css_file\">" >> $BLADE_FILE
+              fi
+            done
+          fi
+
+          # Close head and add body with JS
+          cat >> $BLADE_FILE << EOF
+</head>
+<body>
+    <div id="app"></div>
+    
+    <!-- Load the built JavaScript -->
+    <script type="module" src="/build/$JS_FILENAME"></script>
+</body>
+</html>
+EOF
+
+          echo "✅ Dynamic Blade file created!"
+          echo "=== Final Blade file content ==="
+          cat $BLADE_FILE
+
+      # Step 6: Setup PHP
       - name: 🧩 Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
+          tools: composer
 
-      # Step 7: Install Composer dependencies FIRST
+      # Step 7: Install Composer
       - name: 📦 Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      # Step 8: Create .env file (AFTER composer install)
-      - name: 🔧 Setup Environment
-        run: |
-          cp .env.example .env
-          # Set basic config without database operations
-          sed -i 's/APP_DEBUG=.*/APP_DEBUG=false/' .env
-          sed -i 's/APP_ENV=.*/APP_ENV=production/' .env
+      # Step 8: Install jq for JSON parsing (if not already available)
+      - name: 📦 Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
 
-      # Step 9: Deploy to FTP
+      # Step 9: Deploy
       - name: 🚀 Deploy to FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@4.3.5
         with:
           server: ftp.asktechnologies.net
           username: askftp@asktechnologies.net
           password: ${{ secrets.FTP_PASSWORD }}
-          port: 21
-          protocol: ftp
-          passive: true
           local-dir: ./
           server-dir: /home/
-          state-name: .ftp-deploy-sync-state.json
           exclude: |
             **/.git*
             **/.github*
@@ -89,24 +135,14 @@ jobs:
             **/storage/**
             **/.env.example
             **/README.md
-            **/resources/js/node_modules/
 
-      # Step 10: Final debug instructions
-      - name: ✅ Deployment Debug Complete
+      # Step 10: Final instructions
+      - name: ✅ Deployment Complete
         run: |
-          echo "🚀 Deployment finished!"
+          echo "🚀 Dynamic deployment finished!"
           echo " "
-          echo "🔍 DEBUG INSTRUCTIONS:"
-          echo "1. Check GitHub Actions logs above for:"
-          echo "   - Your current app.jsx content"
-          echo "   - If build files were created"
-          echo "   - What JS files were built"
+          echo "📁 Built files:"
+          echo "JS: ${{ steps.vite-manifest.outputs.js_file }}"
+          echo "CSS: ${{ steps.vite-manifest.outputs.css_files }}"
           echo " "
-          echo "2. After deployment, manually check:"
-          echo "   - FTP: /home/resources/js/app.jsx - is it updated?"
-          echo "   - FTP: /home/public/build/ - are there new files?"
-          echo " "
-          echo "3. Browser steps:"
-          echo "   - Hard refresh: Ctrl+Shift+R"
-          echo "   - Check Console for errors (F12)"
-          echo "   - Check Network tab for loaded JS files"
+          echo "🔄 Force refresh your browser (Ctrl+Shift+R)"
