@@ -12,7 +12,7 @@ function App() {
       fontSize: '30px',
       border: '5px solid yellow'
     }}>
-      <h1>🚀 DEPLOYMENT FILE TEST</h1>
+      <h1>🚀 DEPLOYMENT FILE</h1>
       <p>If you see this, deployment is working!</p>
       <p>Timestamp: {new Date().toLocaleString()}</p>
     </div>
