@@ -27,67 +27,27 @@ jobs:
           npm run build
           echo "✅ React build completed"
 
-      # Step 4: Verify build files
-      - name: 🔍 Verify Build Output
-        run: |
-          echo "📁 Build directory contents:"
-          ls -la public/build/
-          echo "📄 Built JavaScript files:"
-          find public/build -name "*.js" -type f
-
-      # Step 5: Setup PHP for Laravel
+      # Step 4: Setup PHP for Laravel
       - name: 🧩 Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
 
-      # Step 6: Install Composer dependencies
+      # Step 5: Install Composer dependencies
       - name: 📦 Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      # Step 7: Create production .htaccess (if missing)
-      - name: 🔧 Ensure .htaccess exists
+      # Step 6: Clean up problematic files before deploy
+      - name: 🧹 Clean problematic files
         run: |
-          if [ ! -f .htaccess ]; then
-            cat > .htaccess << 'EOF'
-          <IfModule mod_rewrite.c>
-              RewriteEngine On
-              RewriteRule ^(.*)$ public/$1 [L]
-          </IfModule>
-          EOF
-            echo "✅ Created .htaccess file"
-          else
-            echo "✅ .htaccess already exists"
-          fi
+          # Remove files that cause permission issues
+          rm -rf storage/framework/cache/*
+          rm -rf storage/framework/views/*
+          rm -rf storage/logs/*
+          rm -f bootstrap/cache/*.php
+          echo "✅ Cleaned cache and log files"
 
-      # Step 8: Create dynamic Blade file that loads built React assets
-      - name: 🔧 Create Production Blade File
-        run: |
-          # Find the latest built JS file
-          JS_FILE=$(find public/build/assets -name "app-*.js" | head -1)
-          JS_FILENAME=$(basename "$JS_FILE")
-          
-          echo "📄 Using built JS file: $JS_FILENAME"
-          
-          # Create the production Blade file
-          cat > resources/views/welcome.blade.php << EOF
-          <!DOCTYPE html>
-          <html>
-          <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1">
-              <title>Your App</title>
-          </head>
-          <body>
-              <div id="app"></div>
-              <script type="module" src="/build/assets/$JS_FILENAME"></script>
-          </body>
-          </html>
-          EOF
-          
-          echo "✅ Production Blade file created with dynamic JS loading"
-
-      # Step 9: Deploy everything to server
+      # Step 7: Deploy with safe settings
       - name: 🚀 Deploy to Production
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
@@ -96,16 +56,20 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
           server-dir: /
+          # Only exclude essential directories, be more permissive
           exclude: |
-            **/.git*
-            **/.github*
-            **/.env*
+            **/.git/**
+            **/.github/**
             **/node_modules/**
-            **/storage/framework/**
+            **/vendor/**
+            **/.env
+            **/storage/framework/cache/**
+            **/storage/framework/views/**
+            **/storage/logs/**
+            **/bootstrap/cache/**
 
-      # Step 10: Deployment success
+      # Step 8: Deployment success
       - name: ✅ Deployment Complete
         run: |
           echo "🎉 DEPLOYMENT SUCCESSFUL!"
           echo "📝 Your changes are now live at: https://test.asktechnologies.net"
-          echo "🔄 If you don't see changes, force refresh: Ctrl+Shift+R"
