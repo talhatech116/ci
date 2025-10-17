@@ -9,43 +9,44 @@
     <div id="app"></div>
 
     <script>
-        // Directly load the built JS file - no manifest needed
-        const script = document.createElement('script');
-        script.type = 'module';
-        
-        // Try common Vite build patterns
-        const possiblePaths = [
-            '/build/assets/app.js',
-            '/build/assets/index.js', 
-            '/build/assets/main.js'
-        ];
-        
-        let currentTry = 0;
-        
-        function tryLoadScript() {
-            if (currentTry >= possiblePaths.length) {
-                console.error('No built JS file found');
-                document.body.innerHTML = '<p style="color: red; text-align: center; margin-top: 100px;">Error: No built React files found. Check build process.</p>';
-                return;
-            }
-            
-            const path = possiblePaths[currentTry];
-            script.src = path;
-            
-            script.onload = function() {
-                console.log('✅ React loaded successfully from:', path);
-            };
-            
-            script.onerror = function() {
-                console.log('❌ Failed to load from:', path);
-                currentTry++;
-                tryLoadScript();
-            };
-            
-            document.head.appendChild(script);
-        }
-        
-        tryLoadScript();
+        // Dynamically find and load the latest built React file
+        fetch('/build/assets/')
+            .then(response => response.text())
+            .then(html => {
+                // Parse the directory listing
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const links = Array.from(doc.querySelectorAll('a[href]'));
+                
+                // Find the main JS file (starts with 'app-' and ends with '.js')
+                const jsFiles = links
+                    .map(link => link.getAttribute('href'))
+                    .filter(href => href.startsWith('app-') && href.endsWith('.js'))
+                    .sort()
+                    .reverse(); // Get latest file
+                
+                if (jsFiles.length > 0) {
+                    const latestJsFile = jsFiles[0];
+                    console.log('📦 Loading React file:', latestJsFile);
+                    
+                    const script = document.createElement('script');
+                    script.type = 'module';
+                    script.src = '/build/assets/' + latestJsFile;
+                    document.head.appendChild(script);
+                } else {
+                    throw new Error('No built React files found');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error loading React:', error);
+                document.body.innerHTML = `
+                    <div style="text-align: center; margin-top: 100px; color: red;">
+                        <h2>React Build Error</h2>
+                        <p>No built JavaScript files found.</p>
+                        <p>Check that the React build completed successfully.</p>
+                    </div>
+                `;
+            });
     </script>
 </body>
 </html>
