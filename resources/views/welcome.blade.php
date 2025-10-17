@@ -8,32 +8,44 @@
 <body>
     <div id="app"></div>
 
-    <!-- Simple JS file loader -->
     <script>
-        // Try to load from manifest first
-        fetch('/build/.vite/manifest.json')
-            .then(response => {
-                if (!response.ok) throw new Error('Manifest not found');
-                return response.json();
-            })
-            .then(manifest => {
-                if (manifest['resources/js/app.jsx'] && manifest['resources/js/app.jsx'].file) {
-                    const script = document.createElement('script');
-                    script.type = 'module';
-                    script.src = '/build/' + manifest['resources/js/app.jsx'].file;
-                    document.head.appendChild(script);
-                } else {
-                    throw new Error('App entry not found in manifest');
-                }
-            })
-            .catch(error => {
-                console.log('Manifest load failed, trying direct file detection');
-                // Fallback: Load any app-*.js file
-                const script = document.createElement('script');
-                script.type = 'module';
-                script.src = '/build/assets/app.js'; // Try common name
-                document.head.appendChild(script);
-            });
+        // Directly load the built JS file - no manifest needed
+        const script = document.createElement('script');
+        script.type = 'module';
+        
+        // Try common Vite build patterns
+        const possiblePaths = [
+            '/build/assets/app.js',
+            '/build/assets/index.js', 
+            '/build/assets/main.js'
+        ];
+        
+        let currentTry = 0;
+        
+        function tryLoadScript() {
+            if (currentTry >= possiblePaths.length) {
+                console.error('No built JS file found');
+                document.body.innerHTML = '<p style="color: red; text-align: center; margin-top: 100px;">Error: No built React files found. Check build process.</p>';
+                return;
+            }
+            
+            const path = possiblePaths[currentTry];
+            script.src = path;
+            
+            script.onload = function() {
+                console.log('✅ React loaded successfully from:', path);
+            };
+            
+            script.onerror = function() {
+                console.log('❌ Failed to load from:', path);
+                currentTry++;
+                tryLoadScript();
+            };
+            
+            document.head.appendChild(script);
+        }
+        
+        tryLoadScript();
     </script>
 </body>
 </html>
