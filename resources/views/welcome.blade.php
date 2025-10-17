@@ -7,6 +7,7 @@
 
     @if(app()->environment('local') || config('app.debug'))
         <!-- Local Development - Use Vite Only -->
+        @viteReactRefresh
         @vite(['resources/js/app.jsx'])
     @else
         <!-- Production - Use built files -->

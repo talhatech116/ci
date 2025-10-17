@@ -1,12 +1,11 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import HomePage from './pages/HomePage';
 
 function App() {
   return (
     <div>
-      <h1>🚀 Automation working again check !</h1>
-      <p>If you see this, Laravel and React is working!</p>
-      <p>Timestamp: {new Date().toLocaleString()}</p>
+      <HomePage />
     </div>
   );
 }
