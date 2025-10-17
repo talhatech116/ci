@@ -4,35 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My React App</title>
-
-    @if(app()->environment('local'))
-        @vite(['resources/js/app.jsx'])
-    @else
-        @php
-            $manifestPath = public_path('build/.vite/manifest.json');  <!-- FIXED PATH -->
-        @endphp
-
-        @if(file_exists($manifestPath))
-            @php
-                $manifest = json_decode(file_get_contents($manifestPath), true);
-            @endphp
-
-            @if(isset($manifest['resources/js/app.jsx']['file']))
-                <script type="module" src="{{ asset('build/' . $manifest['resources/js/app.jsx']['file']) }}"></script>
-            @else
-                <p style="color: red;">Error: app.jsx not found in manifest.json</p>
-            @endif
-        @else
-            <p style="color: red;">Error: manifest.json is missing in public/build/.vite/</p>
-            <!-- Debug: Check if .vite folder exists -->
-            @php
-                $vitePath = public_path('build/.vite');
-            @endphp
-            <p>Vite folder exists: {{ file_exists($vitePath) ? 'Yes' : 'No' }}</p>
-        @endif
-    @endif
 </head>
 <body>
     <div id="app"></div>
+
+    <!-- Simple JS file loader -->
+    <script>
+        // Try to load from manifest first
+        fetch('/build/.vite/manifest.json')
+            .then(response => {
+                if (!response.ok) throw new Error('Manifest not found');
+                return response.json();
+            })
+            .then(manifest => {
+                if (manifest['resources/js/app.jsx'] && manifest['resources/js/app.jsx'].file) {
+                    const script = document.createElement('script');
+                    script.type = 'module';
+                    script.src = '/build/' + manifest['resources/js/app.jsx'].file;
+                    document.head.appendChild(script);
+                } else {
+                    throw new Error('App entry not found in manifest');
+                }
+            })
+            .catch(error => {
+                console.log('Manifest load failed, trying direct file detection');
+                // Fallback: Load any app-*.js file
+                const script = document.createElement('script');
+                script.type = 'module';
+                script.src = '/build/assets/app.js'; // Try common name
+                document.head.appendChild(script);
+            });
+    </script>
 </body>
 </html>
