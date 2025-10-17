@@ -6,11 +6,8 @@
     <title>My React App</title>
 
     @if(app()->environment('local') || config('app.debug'))
-        <!-- Local Development - Simple direct Vite connection -->
-        <script type="module">
-            // Direct import without Vite complications
-            import('http://localhost:5173/resources/js/app.jsx');
-        </script>
+        <!-- Local Development - Use Vite Only -->
+        @vite(['resources/js/app.jsx'])
     @else
         <!-- Production - Use built files -->
         <?php
