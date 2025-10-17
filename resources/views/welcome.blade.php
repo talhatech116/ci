@@ -9,7 +9,7 @@
         @vite(['resources/js/app.jsx'])
     @else
         @php
-            $manifestPath = public_path('build/manifest.json');
+            $manifestPath = public_path('build/.vite/manifest.json');  <!-- FIXED PATH -->
         @endphp
 
         @if(file_exists($manifestPath))
@@ -23,7 +23,12 @@
                 <p style="color: red;">Error: app.jsx not found in manifest.json</p>
             @endif
         @else
-            <p style="color: red;">Error: manifest.json is missing in public/build</p>
+            <p style="color: red;">Error: manifest.json is missing in public/build/.vite/</p>
+            <!-- Debug: Check if .vite folder exists -->
+            @php
+                $vitePath = public_path('build/.vite');
+            @endphp
+            <p>Vite folder exists: {{ file_exists($vitePath) ? 'Yes' : 'No' }}</p>
         @endif
     @endif
 </head>
