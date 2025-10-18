@@ -95,7 +95,9 @@ const ElearningLanding = () => {
           </nav>
           
           <div className="header-actions">
-            <button className="btn btn-outline">Sign In</button>
+            <button className="btn btn-outline" onClick={() => window.location.href = '/login'}>
+  Sign In
+</button>
             <button className="btn btn-primary">Start Learning</button>
           </div>
           
