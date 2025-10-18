@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import '../../css/FinanceLanding.css';
+import '../../css/Elearning.css';
 
-const FinanceLanding = () => {
+const ElearningLanding = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeFeature, setActiveFeature] = useState(0);
+  const [activeCourse, setActiveCourse] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -14,87 +14,89 @@ const FinanceLanding = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const features = [
+  const courses = [
     {
-      icon: 'fas fa-wallet',
-      title: 'Digital Wallet',
-      description: 'Manage all your finances in one secure digital wallet with instant access',
-      color: '#7c3aed'
+      id: 1,
+      title: "Full-Stack Web Development",
+      instructor: "Sarah Johnson",
+      rating: 4.9,
+      students: 12500,
+      price: 89.99,
+      image: "💻",
+      category: "Development"
     },
     {
-      icon: 'fas fa-exchange-alt',
-      title: 'Instant Transfers',
-      description: 'Send and receive money instantly with zero hidden fees',
-      color: '#06b6d4'
+      id: 2,
+      title: "Advanced React Patterns",
+      instructor: "Mike Chen",
+      rating: 4.8,
+      students: 8400,
+      price: 74.99,
+      image: "⚛️",
+      category: "Frontend"
     },
     {
-      icon: 'fas fa-shield-alt',
-      title: 'Bank-Grade Security',
-      description: 'Your money is protected with enterprise-level security protocols',
-      color: '#10b981'
-    },
-    {
-      icon: 'fas fa-chart-pie',
-      title: 'Smart Analytics',
-      description: 'Get insights into your spending patterns and financial health',
-      color: '#f59e0b'
+      id: 3,
+      title: "Laravel API Development",
+      instructor: "David Wilson",
+      rating: 4.7,
+      students: 9200,
+      price: 69.99,
+      image: "🐘",
+      category: "Backend"
     }
   ];
 
-  const testimonials = [
+  const features = [
     {
-      name: "Sarah Ahmed",
-      role: "Small Business Owner",
-      content: "NayaPay transformed how I manage my business finances. The instant settlement feature is a game-changer!",
-      avatar: "SA"
+      icon: "fas fa-laptop-code",
+      title: "Hands-On Projects",
+      description: "Build real-world applications with guided projects and code reviews"
     },
     {
-      name: "Ali Raza",
-      role: "Freelancer",
-      content: "Finally, a financial app that understands the needs of freelancers. Love the expense tracking features!",
-      avatar: "AR"
+      icon: "fas fa-users",
+      title: "Mentor Support",
+      description: "Get 1:1 guidance from industry experts and experienced developers"
     },
     {
-      name: "Fatima Khan",
-      role: "Student",
-      content: "As a student, NayaPay helps me budget effectively and send money to family without any hassle.",
-      avatar: "FK"
+      icon: "fas fa-certificate",
+      title: "Career Certificates",
+      description: "Earn recognized certificates to advance your career"
+    },
+    {
+      icon: "fas fa-briefcase",
+      title: "Job Ready Skills",
+      description: "Learn exactly what employers are looking for in 2024"
     }
   ];
 
   const stats = [
-    { number: "2M+", label: "Active Users" },
-    { number: "₨50B+", label: "Processed" },
-    { number: "99.9%", label: "Uptime" },
-    { number: "4.8", label: "App Rating" }
-  ];
-
-  const appStores = [
-    { name: "App Store", icon: "fab fa-apple", url: "#" },
-    { name: "Play Store", icon: "fab fa-google-play", url: "#" },
-    { name: "App Gallery", icon: "fab fa-huawei", url: "#" }
+    { number: "50K+", label: "Students Enrolled" },
+    { number: "200+", label: "Expert Instructors" },
+    { number: "1.2K+", label: "Courses Available" },
+    { number: "95%", label: "Career Success Rate" }
   ];
 
   return (
-    <div className="finance-landing">
+    <div className="elearning-landing">
       {/* Header */}
       <header className={`header ${isScrolled ? 'scrolled' : ''}`}>
         <div className="container">
           <div className="logo">
-            <div className="logo-icon">NP</div>
-            <span className="logo-text">NayaPay</span>
+            <span className="logo-icon">Edu</span>
+            <span className="logo-text">LearnPro</span>
           </div>
           
           <nav className={`nav ${isMenuOpen ? 'nav-open' : ''}`}>
+            <a href="#courses">Courses</a>
             <a href="#features">Features</a>
-            <a href="#business">Business</a>
-            <a href="#security">Security</a>
-            <a href="#download">Download</a>
+            <a href="#instructors">Instructors</a>
+            <a href="#pricing">Pricing</a>
           </nav>
           
           <div className="header-actions">
             <button className="btn btn-outline">Sign In</button>
-            <button className="btn btn-primary">Get Started</button>
+            <button className="btn btn-primary">Start Learning</button>
           </div>
           
           <button 
@@ -113,19 +115,20 @@ const FinanceLanding = () => {
         <div className="container">
           <div className="hero-content">
             <h1 className="hero-title">
-              The Future of <span className="gradient-text">Digital Finance</span> is Here
+              Master <span className="gradient-text">Full-Stack Development</span> with Laravel & React
             </h1>
             <p className="hero-subtitle">
-              Experience banking reimagined. Send money, pay bills, and manage your finances with Pakistan's most innovative financial platform.
+              Join thousands of students learning modern web development through project-based courses, 
+              expert mentorship, and career-focused curriculum.
             </p>
             <div className="hero-actions">
               <button className="btn btn-primary btn-large">
-                <i className="fab fa-apple"></i>
-                Download App
+                <i className="fas fa-rocket"></i>
+                Start Free Trial
               </button>
               <button className="btn btn-secondary btn-large">
-                <i className="fab fa-google-play"></i>
-                Google Play
+                <i className="fas fa-play-circle"></i>
+                Watch Demo
               </button>
             </div>
             <div className="hero-stats">
@@ -138,52 +141,30 @@ const FinanceLanding = () => {
             </div>
           </div>
           <div className="hero-visual">
-            <div className="phone-mockup">
-              <div className="phone-screen">
-                <div className="app-header">
-                  <div className="app-balance">
-                    <span>Current Balance</span>
-                    <div className="amount">₨ 45,280</div>
+            <div className="learning-dashboard">
+              <div className="dashboard-card">
+                <div className="card-header">
+                  <span>Your Progress</span>
+                  <div className="progress-circle">
+                    <span>75%</span>
                   </div>
                 </div>
-                <div className="app-actions">
-                  <div className="action-btn">
-                    <i className="fas fa-paper-plane"></i>
-                    <span>Send</span>
-                  </div>
-                  <div className="action-btn">
-                    <i className="fas fa-qrcode"></i>
-                    <span>Scan</span>
-                  </div>
-                  <div className="action-btn">
-                    <i className="fas fa-money-bill-wave"></i>
-                    <span>Request</span>
-                  </div>
-                  <div className="action-btn">
-                    <i className="fas fa-mobile-alt"></i>
-                    <span>Top-up</span>
+                <div className="progress-item">
+                  <span>Laravel Basics</span>
+                  <div className="progress-bar">
+                    <div className="progress-fill" style={{width: '90%'}}></div>
                   </div>
                 </div>
-                <div className="recent-transactions">
-                  <div className="transaction">
-                    <div className="transaction-icon">
-                      <i className="fas fa-shopping-bag"></i>
-                    </div>
-                    <div className="transaction-details">
-                      <div className="transaction-title">Khaadi</div>
-                      <div className="transaction-date">Today, 2:30 PM</div>
-                    </div>
-                    <div className="transaction-amount">-₨ 2,499</div>
+                <div className="progress-item">
+                  <span>React Fundamentals</span>
+                  <div className="progress-bar">
+                    <div className="progress-fill" style={{width: '75%'}}></div>
                   </div>
-                  <div className="transaction">
-                    <div className="transaction-icon">
-                      <i className="fas fa-user"></i>
-                    </div>
-                    <div className="transaction-details">
-                      <div className="transaction-title">Ali Ahmed</div>
-                      <div className="transaction-date">Today, 1:15 PM</div>
-                    </div>
-                    <div className="transaction-amount positive">+₨ 5,000</div>
+                </div>
+                <div className="progress-item">
+                  <span>API Integration</span>
+                  <div className="progress-bar">
+                    <div className="progress-fill" style={{width: '60%'}}></div>
                   </div>
                 </div>
               </div>
@@ -196,17 +177,13 @@ const FinanceLanding = () => {
       <section id="features" className="features">
         <div className="container">
           <div className="section-header">
-            <h2>Why Millions Trust NayaPay</h2>
-            <p>Everything you need to manage your money, all in one place</p>
+            <h2>Why Learn With Us?</h2>
+            <p>We provide everything you need to go from beginner to job-ready developer</p>
           </div>
           <div className="features-grid">
             {features.map((feature, index) => (
-              <div 
-                key={index} 
-                className={`feature-card ${activeFeature === index ? 'active' : ''}`}
-                onMouseEnter={() => setActiveFeature(index)}
-              >
-                <div className="feature-icon" style={{ backgroundColor: feature.color }}>
+              <div key={index} className="feature-card">
+                <div className="feature-icon">
                   <i className={feature.icon}></i>
                 </div>
                 <h3>{feature.title}</h3>
@@ -217,127 +194,32 @@ const FinanceLanding = () => {
         </div>
       </section>
 
-      {/* Business Section */}
-      <section id="business" className="business">
-        <div className="container">
-          <div className="business-content">
-            <div className="business-text">
-              <h2>Built for Pakistan's Digital Economy</h2>
-              <p>NayaPay is designed to meet the unique needs of Pakistani consumers and businesses, providing seamless financial solutions for everyone.</p>
-              
-              <div className="business-features">
-                <div className="business-feature">
-                  <i className="fas fa-bolt"></i>
-                  <div>
-                    <h4>Instant Settlements</h4>
-                    <p>Get paid instantly with real-time payment processing</p>
-                  </div>
-                </div>
-                <div className="business-feature">
-                  <i className="fas fa-percentage"></i>
-                  <div>
-                    <h4>Lowest Fees</h4>
-                    <p>Enjoy the most competitive rates in the market</p>
-                  </div>
-                </div>
-                <div className="business-feature">
-                  <i className="fas fa-headset"></i>
-                  <div>
-                    <h4>24/7 Support</h4>
-                    <p>Round-the-clock customer service in Urdu and English</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="business-visual">
-              <div className="floating-cards">
-                <div className="card card-1">
-                  <div className="card-header">
-                    <span>NayaPay Business</span>
-                    <i className="fas fa-building"></i>
-                  </div>
-                  <div className="card-content">
-                    <div className="metric">
-                      <div className="metric-value">₨ 12.5M</div>
-                      <div className="metric-label">Monthly Volume</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="card card-2">
-                  <div className="card-header">
-                    <span>QR Payments</span>
-                    <i className="fas fa-qrcode"></i>
-                  </div>
-                  <div className="card-content">
-                    <div className="metric">
-                      <div className="metric-value">50K+</div>
-                      <div className="metric-label">Merchants</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Security Section */}
-      <section id="security" className="security">
-        <div className="container">
-          <div className="security-content">
-            <div className="security-visual">
-              <div className="security-shield">
-                <i className="fas fa-shield-alt"></i>
-              </div>
-            </div>
-            <div className="security-text">
-              <h2>Bank-Grade Security</h2>
-              <p>Your financial safety is our top priority. We use military-grade encryption and advanced security measures to protect your money and data.</p>
-              
-              <div className="security-features">
-                <div className="security-feature">
-                  <i className="fas fa-fingerprint"></i>
-                  <span>Biometric Authentication</span>
-                </div>
-                <div className="security-feature">
-                  <i className="fas fa-lock"></i>
-                  <span>End-to-End Encryption</span>
-                </div>
-                <div className="security-feature">
-                  <i className="fas fa-eye-slash"></i>
-                  <span>Privacy First</span>
-                </div>
-                <div className="security-feature">
-                  <i className="fas fa-bell"></i>
-                  <span>Instant Alerts</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="testimonials">
+      {/* Courses Section */}
+      <section id="courses" className="courses">
         <div className="container">
           <div className="section-header">
-            <h2>Loved by Pakistan</h2>
-            <p>Join millions of satisfied users across the country</p>
+            <h2>Popular Courses</h2>
+            <p>Start your journey with our most popular full-stack development courses</p>
           </div>
-          <div className="testimonials-grid">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="testimonial-card">
-                <div className="testimonial-content">
-                  "{testimonial.content}"
+          <div className="courses-grid">
+            {courses.map((course, index) => (
+              <div key={course.id} className="course-card">
+                <div className="course-image">
+                  <div className="course-emoji">{course.image}</div>
+                  <div className="course-category">{course.category}</div>
                 </div>
-                <div className="testimonial-author">
-                  <div className="author-avatar">
-                    {testimonial.avatar}
+                <div className="course-content">
+                  <h3>{course.title}</h3>
+                  <p className="course-instructor">By {course.instructor}</p>
+                  <div className="course-meta">
+                    <div className="course-rating">
+                      <i className="fas fa-star"></i>
+                      <span>{course.rating}</span>
+                      <span>({course.students}+ students)</span>
+                    </div>
+                    <div className="course-price">${course.price}</div>
                   </div>
-                  <div className="author-info">
-                    <div className="author-name">{testimonial.name}</div>
-                    <div className="author-role">{testimonial.role}</div>
-                  </div>
+                  <button className="btn btn-outline btn-small">Enroll Now</button>
                 </div>
               </div>
             ))}
@@ -345,22 +227,21 @@ const FinanceLanding = () => {
         </div>
       </section>
 
-      {/* Download CTA */}
-      <section id="download" className="download">
+      {/* CTA Section */}
+      <section className="cta">
         <div className="container">
-          <div className="download-content">
-            <h2>Ready to Get Started?</h2>
-            <p>Download NayaPay today and experience the future of digital payments</p>
-            <div className="download-buttons">
-              {appStores.map((store, index) => (
-                <button key={index} className="store-btn">
-                  <i className={store.icon}></i>
-                  <div>
-                    <span>Download on</span>
-                    <strong>{store.name}</strong>
-                  </div>
-                </button>
-              ))}
+          <div className="cta-content">
+            <h2>Start Your Coding Journey Today</h2>
+            <p>Join our community of learners and transform your career in tech</p>
+            <div className="cta-actions">
+              <button className="btn btn-primary btn-large">
+                <i className="fas fa-graduation-cap"></i>
+                Explore All Courses
+              </button>
+              <button className="btn btn-secondary btn-large">
+                <i className="fas fa-calendar"></i>
+                Book Career Consultation
+              </button>
             </div>
           </div>
         </div>
@@ -372,24 +253,24 @@ const FinanceLanding = () => {
           <div className="footer-content">
             <div className="footer-section">
               <div className="logo">
-                <div className="logo-icon">NP</div>
-                <span className="logo-text">NayaPay</span>
+                <span className="logo-icon">Edu</span>
+                <span className="logo-text">LearnPro</span>
               </div>
-              <p>Making digital payments simple, secure, and accessible for everyone in Pakistan.</p>
+              <p>Master full-stack development with project-based learning and expert mentorship.</p>
               <div className="social-links">
-                <a href="#"><i className="fab fa-facebook-f"></i></a>
                 <a href="#"><i className="fab fa-twitter"></i></a>
-                <a href="#"><i className="fab fa-instagram"></i></a>
-                <a href="#"><i className="fab fa-linkedin-in"></i></a>
+                <a href="#"><i className="fab fa-linkedin"></i></a>
+                <a href="#"><i className="fab fa-github"></i></a>
+                <a href="#"><i className="fab fa-youtube"></i></a>
               </div>
             </div>
             <div className="footer-section">
-              <h3>Product</h3>
+              <h3>Learning Paths</h3>
               <ul>
-                <li><a href="#">Personal</a></li>
-                <li><a href="#">Business</a></li>
-                <li><a href="#">Merchants</a></li>
-                <li><a href="#">Pricing</a></li>
+                <li><a href="#">Full-Stack Development</a></li>
+                <li><a href="#">Frontend Specialization</a></li>
+                <li><a href="#">Backend Engineering</a></li>
+                <li><a href="#">DevOps & Deployment</a></li>
               </ul>
             </div>
             <div className="footer-section">
@@ -397,8 +278,8 @@ const FinanceLanding = () => {
               <ul>
                 <li><a href="#">About Us</a></li>
                 <li><a href="#">Careers</a></li>
-                <li><a href="#">Press</a></li>
-                <li><a href="#">Blog</a></li>
+                <li><a href="#">Instructors</a></li>
+                <li><a href="#">Success Stories</a></li>
               </ul>
             </div>
             <div className="footer-section">
@@ -412,11 +293,11 @@ const FinanceLanding = () => {
             </div>
           </div>
           <div className="footer-bottom">
-            <p>&copy; 2024 NayaPay. All rights reserved.</p>
+            <p>&copy; 2024 LearnPro. All rights reserved.</p>
             <div className="footer-links">
               <a href="#">Privacy</a>
               <a href="#">Terms</a>
-              <a href="#">Security</a>
+              <a href="#">Cookies</a>
             </div>
           </div>
         </div>
@@ -425,4 +306,4 @@ const FinanceLanding = () => {
   );
 };
 
-export default FinanceLanding;
+export default ElearningLanding;
