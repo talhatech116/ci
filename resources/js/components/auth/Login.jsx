@@ -61,84 +61,189 @@ const Login = () => {
     }
   };
 
+  // Basic CSS styles (same as register)
+  const styles = {
+    container: {
+      minHeight: '100vh',
+      backgroundColor: '#f8fafc',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px'
+    },
+    card: {
+      maxWidth: '400px',
+      width: '100%',
+      backgroundColor: 'white',
+      borderRadius: '12px',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      overflow: 'hidden'
+    },
+    header: {
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      padding: '30px',
+      color: 'white',
+      textAlign: 'center'
+    },
+    formContainer: {
+      padding: '30px'
+    },
+    input: {
+      width: '100%',
+      padding: '12px 16px',
+      border: '1px solid #d1d5db',
+      borderRadius: '8px',
+      fontSize: '14px',
+      marginBottom: '16px',
+      boxSizing: 'border-box'
+    },
+    button: {
+      width: '100%',
+      padding: '12px 16px',
+      backgroundColor: '#4f46e5',
+      color: 'white',
+      border: 'none',
+      borderRadius: '8px',
+      fontSize: '16px',
+      fontWeight: '600',
+      cursor: 'pointer',
+      marginBottom: '16px'
+    },
+    socialButton: {
+      width: '100%',
+      padding: '12px 16px',
+      border: 'none',
+      borderRadius: '8px',
+      fontSize: '14px',
+      fontWeight: '600',
+      cursor: 'pointer',
+      marginBottom: '12px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    twitterButton: {
+      backgroundColor: '#1da1f2',
+      color: 'white'
+    },
+    facebookButton: {
+      backgroundColor: '#1877f2',
+      color: 'white'
+    },
+    error: {
+      backgroundColor: '#fef2f2',
+      border: '1px solid #fecaca',
+      color: '#dc2626',
+      padding: '12px 16px',
+      borderRadius: '8px',
+      marginBottom: '20px',
+      fontSize: '14px'
+    },
+    success: {
+      backgroundColor: '#f0fdf4',
+      border: '1px solid #bbf7d0',
+      color: '#166534',
+      padding: '12px 16px',
+      borderRadius: '8px',
+      marginBottom: '20px',
+      fontSize: '14px'
+    },
+    link: {
+      color: '#4f46e5',
+      textDecoration: 'none',
+      fontWeight: '600'
+    },
+    loadingSpinner: {
+      display: 'inline-block',
+      width: '20px',
+      height: '20px',
+      border: '2px solid #ffffff',
+      borderTop: '2px solid transparent',
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite',
+      marginRight: '8px'
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
+    <div style={styles.container}>
+      <div style={styles.card}>
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
-          <h2 className="text-2xl font-bold text-center">Welcome Back</h2>
-          <p className="text-blue-100 text-center mt-2">Sign in to your account</p>
+        <div style={styles.header}>
+          <h1 style={{ fontSize: '28px', fontWeight: 'bold', margin: '0 0 8px 0' }}>
+            Sign In
+          </h1>
         </div>
 
-        {/* Form */}
-        <div className="p-8">
+        {/* Form Content */}
+        <div style={styles.formContainer}>
+    
           {/* Success Message */}
           {successMessage && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm text-green-800">{successMessage}</p>
+            <div style={styles.success}>
+              {successMessage}
             </div>
           )}
 
           {/* Error Messages */}
           {(error || localError) && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-800">{error || localError}</p>
+            <div style={styles.error}>
+              {error || localError}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ 
+                display: 'block', 
+                fontSize: '14px', 
+                fontWeight: '600',
+                marginBottom: '8px',
+                color: '#374151'
+              }}>
                 Email Address
               </label>
               <input
-                id="email"
-                name="email"
                 type="email"
-                autoComplete="email"
+                name="email"
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                style={styles.input}
                 placeholder="Enter your email"
               />
-            </div>
 
-            {/* Password Field */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label style={{ 
+                display: 'block', 
+                fontSize: '14px', 
+                fontWeight: '600',
+                marginBottom: '8px',
+                color: '#374151'
+              }}>
                 Password
               </label>
               <input
-                id="password"
-                name="password"
                 type="password"
-                autoComplete="current-password"
+                name="password"
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                style={styles.input}
                 placeholder="Enter your password"
               />
             </div>
 
-            {/* Submit Button */}
-            <button
+            <button 
               type="submit"
               disabled={loading}
-              className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 ${
-                loading 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
-              }`}
+              style={{
+                ...styles.button,
+                ...(loading ? { backgroundColor: '#9ca3af', cursor: 'not-allowed' } : {})
+              }}
             >
               {loading ? (
-                <div className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={styles.loadingSpinner}></div>
                   Signing in...
                 </div>
               ) : (
@@ -147,29 +252,39 @@ const Login = () => {
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Don't have an account?</span>
-              </div>
-            </div>
-
-            {/* Register Link */}
-            <div className="mt-4 text-center">
-              <Link
-                to="/register"
-                className="text-blue-600 hover:text-blue-500 font-medium transition duration-200"
-              >
+          {/* Register Link */}
+          <div style={{ 
+            textAlign: 'center', 
+            marginTop: '24px',
+            paddingTop: '24px',
+            borderTop: '1px solid #e5e7eb'
+          }}>
+            <p style={{ margin: 0, color: '#6b7280', fontSize: '14px' }}>
+              Don't have an account?{' '}
+              <Link to="/register" style={styles.link}>
                 Create new account
               </Link>
-            </div>
+            </p>
+          </div>
+
+          {/* Website URL */}
+          <div style={{ textAlign: 'center', marginTop: '16px' }}>
+            <p style={{ margin: 0, color: '#9ca3af', fontSize: '12px' }}>
+              www.learnpro.com
+            </p>
           </div>
         </div>
       </div>
+
+      {/* Add CSS for spinner animation */}
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
     </div>
   );
 };
