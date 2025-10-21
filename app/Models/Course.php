@@ -16,4 +16,15 @@ class Course extends Model
         'thumbnail',
         'status'
     ];
+
+    
+    protected $attributes = [
+        'status' => 'draft'
+    ];
+
+    // Relationship with instructor
+    public function instructor()
+    {
+        return $this->belongsTo(User::class, 'instructor_id');
+    }
 }

@@ -26,8 +26,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('instructor')->middleware('instructor')->group(function () {
         Route::get('/dashboard', [InstructorDashboard::class, 'index']);
         Route::put('/profile', [InstructorDashboard::class, 'updateProfile']);
+        Route::get('/dashboard', [InstructorDashboard::class, 'index']);
         Route::post('/courses', [InstructorController::class, 'store']);
         Route::get('/courses', [InstructorController::class, 'index']);
+        Route::delete('/courses/{course}', [InstructorController::class, 'destroy']);
     });
 
     // Admin routes

@@ -10,10 +10,12 @@ class CheckInstructor
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user() || !$request->user()->isInstructor()) {
-            return response()->json(['error' => 'Unauthorized. Instructor access required.'], 403);
+        if (auth()->check() && auth()->user()->role === 'instructor') {
+            return $next($request);
         }
 
-        return $next($request);
+        return response()->json([
+            'message' => 'Access denied. Instructor permissions required.'
+        ], 403);
     }
 }

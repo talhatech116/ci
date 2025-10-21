@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import CreateCourse from '../instructor/CreateCourse';
+import MyCourses from '../instructor/MyCourses';
 
 const InstructorDashboard = () => {
   const { user, logout } = useAuth();
@@ -136,33 +137,43 @@ const InstructorDashboard = () => {
       fontWeight: '500',
       marginTop: '15px'
     },
-    // NEW STYLES FOR TABS
+    // TAB STYLES
     tabContainer: {
       display: 'flex',
-      gap: '10px',
+      gap: '8px',
       marginBottom: '30px',
-      borderBottom: '1px solid #e5e7eb',
-      paddingBottom: '10px'
+      borderBottom: '2px solid #e5e7eb',
+      paddingBottom: '0',
+      overflowX: 'auto',
     },
     tab: {
-      padding: '12px 24px',
+      padding: '12px 20px',
       border: 'none',
       backgroundColor: 'transparent',
       cursor: 'pointer',
       borderRadius: '8px 8px 0 0',
       fontWeight: '500',
       color: '#6b7280',
-      transition: 'all 0.3s ease'
+      transition: 'all 0.3s ease',
+      whiteSpace: 'nowrap',
+      fontSize: '14px',
+      borderBottom: '2px solid transparent',
+      marginBottom: '-2px'
     },
     activeTab: {
-      padding: '12px 24px',
+      padding: '12px 20px',
       border: 'none',
       backgroundColor: '#059669',
       color: 'white',
       cursor: 'pointer',
       borderRadius: '8px 8px 0 0',
       fontWeight: '600',
-      transition: 'all 0.3s ease'
+      transition: 'all 0.3s ease',
+      whiteSpace: 'nowrap',
+      fontSize: '14px',
+      borderBottom: '2px solid #059669',
+      marginBottom: '-2px',
+      boxShadow: '0 2px 4px rgba(5, 150, 105, 0.2)'
     },
     tabContent: {
       minHeight: '400px'
@@ -208,25 +219,25 @@ const InstructorDashboard = () => {
             onClick={() => setActiveTab('overview')}
             style={activeTab === 'overview' ? styles.activeTab : styles.tab}
           >
-            Overview
+            📊 Overview
           </button>
           <button 
             onClick={() => setActiveTab('my-courses')}
             style={activeTab === 'my-courses' ? styles.activeTab : styles.tab}
           >
-            My Courses
+            📚 My Courses
           </button>
           <button 
             onClick={() => setActiveTab('create-course')}
             style={activeTab === 'create-course' ? styles.activeTab : styles.tab}
           >
-            Create Course
+            ➕ Create Course
           </button>
           <button 
             onClick={() => setActiveTab('analytics')}
             style={activeTab === 'analytics' ? styles.activeTab : styles.tab}
           >
-            Analytics
+            📈 Analytics
           </button>
         </div>
 
@@ -270,7 +281,6 @@ const InstructorDashboard = () => {
                       Node.js Advanced Patterns (315 students)
                     </li>
                   </ul>
-                  {/* UPDATED BUTTON - Now navigates to Create Course tab */}
                   <button 
                     style={styles.createBtn}
                     onClick={() => setActiveTab('create-course')}
@@ -342,6 +352,15 @@ const InstructorDashboard = () => {
             <div style={styles.card}>
               <h3 style={styles.cardTitle}>Detailed Analytics</h3>
               <p>Course performance, student progress, revenue reports will appear here.</p>
+              <div style={{ marginTop: '20px', padding: '20px', backgroundColor: '#f8fafc', borderRadius: '8px' }}>
+                <h4 style={{ marginBottom: '10px' }}>Coming Soon Features:</h4>
+                <ul style={{ color: '#6b7280', lineHeight: '1.6' }}>
+                  <li>📊 Student progress analytics</li>
+                  <li>💰 Revenue reports and insights</li>
+                  <li>📈 Course performance metrics</li>
+                  <li>🎯 Engagement tracking</li>
+                </ul>
+              </div>
             </div>
           )}
         </div>

@@ -15,75 +15,79 @@ const CreateCourse = () => {
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage('');
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setMessage('');
+  
+  try {
+    const token = localStorage.getItem('token');
     
-    try {
-      // Get the authentication token from localStorage
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        setMessage('You are not authenticated. Please log in again.');
-        setLoading(false);
-        return;
-      }
-
-      // Make the API request with authentication headers
-      const response = await axios.post('/api/instructor/courses', courseData, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      });
-
-      setMessage('Course created successfully!');
-      
-      // Reset form
-      setCourseData({ 
-        title: '', 
-        description: '', 
-        price: 0, 
-        category: '', 
-        level: 'beginner' 
-      });
-
-      // Optional: Redirect to courses list after successful creation
-      // setTimeout(() => {
-      //   navigate('/instructor/dashboard');
-      // }, 2000);
-
-    } catch (error) {
-      console.error('Error creating course:', error);
-      
-      // Handle different types of errors
-      if (error.response) {
-        // Server responded with error status
-        if (error.response.status === 403) {
-          setMessage('Access forbidden. You may not have instructor permissions.');
-        } else if (error.response.status === 401) {
-          setMessage('Authentication failed. Please log in again.');
-        } else if (error.response.status === 422) {
-          // Validation errors from Laravel
-          const validationErrors = error.response.data.errors;
-          const errorMessages = Object.values(validationErrors).flat().join(', ');
-          setMessage(`Validation error: ${errorMessages}`);
-        } else {
-          setMessage(`Error: ${error.response.data.message || 'Failed to create course'}`);
-        }
-      } else if (error.request) {
-        // Network error
-        setMessage('Network error. Please check your connection and try again.');
-      } else {
-        // Other errors
-        setMessage('An unexpected error occurred. Please try again.');
-      }
-    } finally {
+    if (!token) {
+      setMessage('You are not authenticated. Please log in again.');
       setLoading(false);
+      return;
     }
-  };
+
+    const response = await fetch('/api/instructor/courses', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify(courseData)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Handle different HTTP status codes
+      if (response.status === 422 && data.errors) {
+        // Validation errors
+        const errorMessages = Object.values(data.errors).flat().join(', ');
+        throw new Error(`Validation error: ${errorMessages}`);
+      } else {
+        throw new Error(data.message || `HTTP error! status: ${response.status}`);
+      }
+    }
+
+    setMessage('Course created successfully!');
+    
+    // Reset form
+    setCourseData({ 
+      title: '', 
+      description: '', 
+      price: 0, 
+      category: '', 
+      level: 'beginner' 
+    });
+
+  } catch (error) {
+    console.error('Error creating course:', error);
+    
+    // Handle different error types
+    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+      setMessage('Network error. Please check your connection and try again.');
+    } else if (error.message.includes('Validation error')) {
+      setMessage(error.message);
+    } else if (error.message.includes('HTTP error')) {
+      const status = error.message.split('status: ')[1];
+      if (status === '403') {
+        setMessage('Access forbidden. You may not have instructor permissions.');
+      } else if (status === '401') {
+        setMessage('Authentication failed. Please log in again.');
+      } else {
+        setMessage(error.message);
+      }
+    } else {
+      setMessage(error.message || 'An unexpected error occurred. Please try again.');
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleBackToDashboard = () => {
     navigate('/instructor/dashboard');
