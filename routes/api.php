@@ -6,6 +6,7 @@ use App\Http\Controllers\Student\DashboardController as StudentDashboard;
 use App\Http\Controllers\Instructor\DashboardController as InstructorDashboard;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Instructor\InstructorController;
+use App\Http\Controllers\CourseController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -38,4 +39,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users', [AdminDashboard::class, 'manageUsers']);
         Route::put('/users/{user}/toggle-status', [AdminDashboard::class, 'toggleUserStatus']);
     });
+});
+
+Route::get('/courses', function () {
+    $courses = \App\Models\Course::where('status', 'published')
+        ->with('instructor')
+        ->get();
+    
+    return response()->json(['courses' => $courses]);
 });

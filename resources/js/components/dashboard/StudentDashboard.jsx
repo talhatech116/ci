@@ -1,11 +1,13 @@
 // resources/js/components/dashboard/StudentDashboard.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import CourseCatalog from '../student/CourseCatalog';
 
 const StudentDashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('overview');
 
   const handleLogout = async () => {
     await logout();
@@ -117,6 +119,47 @@ const StudentDashboard = () => {
     statLabel: {
       fontSize: '14px',
       color: '#6b7280'
+    },
+    // TAB STYLES
+    tabContainer: {
+      display: 'flex',
+      gap: '8px',
+      marginBottom: '30px',
+      borderBottom: '2px solid #e5e7eb',
+      paddingBottom: '0',
+      overflowX: 'auto',
+    },
+    tab: {
+      padding: '12px 20px',
+      border: 'none',
+      backgroundColor: 'transparent',
+      cursor: 'pointer',
+      borderRadius: '8px 8px 0 0',
+      fontWeight: '500',
+      color: '#6b7280',
+      transition: 'all 0.3s ease',
+      whiteSpace: 'nowrap',
+      fontSize: '14px',
+      borderBottom: '2px solid transparent',
+      marginBottom: '-2px'
+    },
+    activeTab: {
+      padding: '12px 20px',
+      border: 'none',
+      backgroundColor: '#4f46e5',
+      color: 'white',
+      cursor: 'pointer',
+      borderRadius: '8px 8px 0 0',
+      fontWeight: '600',
+      transition: 'all 0.3s ease',
+      whiteSpace: 'nowrap',
+      fontSize: '14px',
+      borderBottom: '2px solid #4f46e5',
+      marginBottom: '-2px',
+      boxShadow: '0 2px 4px rgba(79, 70, 229, 0.2)'
+    },
+    tabContent: {
+      minHeight: '400px'
     }
   };
 
@@ -148,84 +191,152 @@ const StudentDashboard = () => {
           </p>
         </div>
 
-        {/* Stats Overview */}
-        <div style={styles.statsGrid}>
-          <div style={styles.statCard}>
-            <div style={styles.statNumber}>5</div>
-            <div style={styles.statLabel}>Enrolled Courses</div>
-          </div>
-          <div style={styles.statCard}>
-            <div style={styles.statNumber}>12</div>
-            <div style={styles.statLabel}>Completed Lessons</div>
-          </div>
-          <div style={styles.statCard}>
-            <div style={styles.statNumber}>85%</div>
-            <div style={styles.statLabel}>Average Progress</div>
-          </div>
+        {/* TAB NAVIGATION */}
+        <div style={styles.tabContainer}>
+          <button 
+            onClick={() => setActiveTab('overview')}
+            style={activeTab === 'overview' ? styles.activeTab : styles.tab}
+          >
+            📊 Overview
+          </button>
+          <button 
+            onClick={() => setActiveTab('my-courses')}
+            style={activeTab === 'my-courses' ? styles.activeTab : styles.tab}
+          >
+            📚 My Courses
+          </button>
+          <button 
+            onClick={() => setActiveTab('browse')}
+            style={activeTab === 'browse' ? styles.activeTab : styles.tab}
+          >
+            🔍 Browse Courses
+          </button>
+          <button 
+            onClick={() => setActiveTab('progress')}
+            style={activeTab === 'progress' ? styles.activeTab : styles.tab}
+          >
+            📈 My Progress
+          </button>
         </div>
 
-        {/* Content Grid */}
-        <div style={styles.grid}>
-          {/* Current Courses */}
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Current Courses</h3>
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              <li style={{ padding: '10px 0', borderBottom: '1px solid #e5e7eb' }}>
-                Web Development Fundamentals
-              </li>
-              <li style={{ padding: '10px 0', borderBottom: '1px solid #e5e7eb' }}>
-                Data Science Basics
-              </li>
-              <li style={{ padding: '10px 0' }}>
-                Digital Marketing Mastery
-              </li>
-            </ul>
-          </div>
+        {/* TAB CONTENT */}
+        <div style={styles.tabContent}>
+          {activeTab === 'overview' && (
+            <div>
+              {/* Stats Overview */}
+              <div style={styles.statsGrid}>
+                <div style={styles.statCard}>
+                  <div style={styles.statNumber}>5</div>
+                  <div style={styles.statLabel}>Enrolled Courses</div>
+                </div>
+                <div style={styles.statCard}>
+                  <div style={styles.statNumber}>12</div>
+                  <div style={styles.statLabel}>Completed Lessons</div>
+                </div>
+                <div style={styles.statCard}>
+                  <div style={styles.statNumber}>85%</div>
+                  <div style={styles.statLabel}>Average Progress</div>
+                </div>
+              </div>
 
-          {/* Recent Activity */}
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Recent Activity</h3>
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                Completed: Introduction to HTML
-              </li>
-              <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                Started: CSS Fundamentals
-              </li>
-              <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                Quiz passed: JavaScript Basics
-              </li>
-            </ul>
-          </div>
+              {/* Content Grid */}
+              <div style={styles.grid}>
+                {/* Current Courses */}
+                <div style={styles.card}>
+                  <h3 style={styles.cardTitle}>Current Courses</h3>
+                  <ul style={{ listStyle: 'none', padding: 0 }}>
+                    <li style={{ padding: '10px 0', borderBottom: '1px solid #e5e7eb' }}>
+                      Web Development Fundamentals
+                    </li>
+                    <li style={{ padding: '10px 0', borderBottom: '1px solid #e5e7eb' }}>
+                      Data Science Basics
+                    </li>
+                    <li style={{ padding: '10px 0' }}>
+                      Digital Marketing Mastery
+                    </li>
+                  </ul>
+                </div>
 
-          {/* Upcoming Deadlines */}
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Upcoming Deadlines</h3>
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                Assignment: CSS Project - Due in 3 days
-              </li>
-              <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                Quiz: JavaScript Functions - Due in 5 days
-              </li>
-            </ul>
-          </div>
+                {/* Recent Activity */}
+                <div style={styles.card}>
+                  <h3 style={styles.cardTitle}>Recent Activity</h3>
+                  <ul style={{ listStyle: 'none', padding: 0 }}>
+                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
+                      Completed: Introduction to HTML
+                    </li>
+                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
+                      Started: CSS Fundamentals
+                    </li>
+                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
+                      Quiz passed: JavaScript Basics
+                    </li>
+                  </ul>
+                </div>
 
-          {/* Recommended Courses */}
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Recommended For You</h3>
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                Advanced React Patterns
-              </li>
-              <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                Node.js Backend Development
-              </li>
-              <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                Database Design Principles
-              </li>
-            </ul>
-          </div>
+                {/* Upcoming Deadlines */}
+                <div style={styles.card}>
+                  <h3 style={styles.cardTitle}>Upcoming Deadlines</h3>
+                  <ul style={{ listStyle: 'none', padding: 0 }}>
+                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
+                      Assignment: CSS Project - Due in 3 days
+                    </li>
+                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
+                      Quiz: JavaScript Functions - Due in 5 days
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Recommended Courses */}
+                <div style={styles.card}>
+                  <h3 style={styles.cardTitle}>Recommended For You</h3>
+                  <ul style={{ listStyle: 'none', padding: 0 }}>
+                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
+                      Advanced React Patterns
+                    </li>
+                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
+                      Node.js Backend Development
+                    </li>
+                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
+                      Database Design Principles
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'my-courses' && (
+            <div style={styles.card}>
+              <h3 style={styles.cardTitle}>My Enrolled Courses</h3>
+              <p>Your enrolled courses will appear here. Browse courses to get started!</p>
+              <div style={{ padding: '20px', backgroundColor: '#f8fafc', borderRadius: '8px', marginTop: '15px' }}>
+                <h4 style={{ color: '#6b7280', marginBottom: '10px' }}>No courses enrolled yet</h4>
+                <p style={{ color: '#6b7280', fontSize: '14px' }}>
+                  Visit the "Browse Courses" tab to discover and enroll in courses.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'browse' && (
+            <CourseCatalog />
+          )}
+
+          {activeTab === 'progress' && (
+            <div style={styles.card}>
+              <h3 style={styles.cardTitle}>My Learning Progress</h3>
+              <p>Track your course progress, certificates, and achievements here.</p>
+              <div style={{ padding: '20px', backgroundColor: '#f0f9ff', borderRadius: '8px', marginTop: '15px' }}>
+                <h4 style={{ color: '#0369a1', marginBottom: '10px' }}>Learning Analytics</h4>
+                <ul style={{ color: '#6b7280', lineHeight: '1.6' }}>
+                  <li>📊 Course completion rates</li>
+                  <li>⏱️ Time spent learning</li>
+                  <li>🏆 Achievements and badges</li>
+                  <li>📜 Certificates earned</li>
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>
