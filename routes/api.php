@@ -7,6 +7,7 @@ use App\Http\Controllers\Instructor\DashboardController as InstructorDashboard;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Instructor\InstructorController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\Student\EnrollmentController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -21,6 +22,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('student')->middleware('student')->group(function () {
         Route::get('/dashboard', [StudentDashboard::class, 'index']);
         Route::put('/profile', [StudentDashboard::class, 'updateProfile']);
+
+        Route::post('/courses/{course}/enroll', [EnrollmentController::class, 'enroll']);
+        Route::get('/enrollments', [EnrollmentController::class, 'myEnrollments']);
+        Route::put('/courses/{course}/progress', [EnrollmentController::class, 'updateProgress']);
     });
 
     // Instructor routes

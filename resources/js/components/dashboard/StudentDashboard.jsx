@@ -1,13 +1,57 @@
 // resources/js/components/dashboard/StudentDashboard.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import CourseCatalog from '../student/CourseCatalog';
+import MyEnrolledCourses from '../student/MyEnrolledCourses';
 
 const StudentDashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+  const [enrollments, setEnrollments] = useState([]);
+  const [stats, setStats] = useState({
+    enrolledCourses: 0,
+    completedCourses: 0,
+    averageProgress: 0
+  });
+
+  useEffect(() => {
+    if (activeTab === 'my-courses' || activeTab === 'overview') {
+      fetchEnrollments();
+    }
+  }, [activeTab]);
+
+  const fetchEnrollments = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/student/enrollments', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setEnrollments(data.enrollments || []);
+        
+        // Calculate stats
+        const enrolledCount = data.enrollments.length;
+        const completedCount = data.enrollments.filter(e => e.video_completed).length;
+        const avgProgress = data.enrollments.length > 0 
+          ? data.enrollments.reduce((sum, e) => sum + e.video_progress, 0) / data.enrollments.length 
+          : 0;
+
+        setStats({
+          enrolledCourses: enrolledCount,
+          completedCourses: completedCount,
+          averageProgress: Math.round(avgProgress)
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching enrollments:', error);
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -226,115 +270,113 @@ const StudentDashboard = () => {
               {/* Stats Overview */}
               <div style={styles.statsGrid}>
                 <div style={styles.statCard}>
-                  <div style={styles.statNumber}>5</div>
+                  <div style={styles.statNumber}>{stats.enrolledCourses}</div>
                   <div style={styles.statLabel}>Enrolled Courses</div>
                 </div>
                 <div style={styles.statCard}>
-                  <div style={styles.statNumber}>12</div>
-                  <div style={styles.statLabel}>Completed Lessons</div>
+                  <div style={styles.statNumber}>{stats.completedCourses}</div>
+                  <div style={styles.statLabel}>Completed Courses</div>
                 </div>
                 <div style={styles.statCard}>
-                  <div style={styles.statNumber}>85%</div>
+                  <div style={styles.statNumber}>{stats.averageProgress}%</div>
                   <div style={styles.statLabel}>Average Progress</div>
                 </div>
               </div>
 
-              {/* Content Grid */}
-              <div style={styles.grid}>
-                {/* Current Courses */}
-                <div style={styles.card}>
-                  <h3 style={styles.cardTitle}>Current Courses</h3>
-                  <ul style={{ listStyle: 'none', padding: 0 }}>
-                    <li style={{ padding: '10px 0', borderBottom: '1px solid #e5e7eb' }}>
-                      Web Development Fundamentals
-                    </li>
-                    <li style={{ padding: '10px 0', borderBottom: '1px solid #e5e7eb' }}>
-                      Data Science Basics
-                    </li>
-                    <li style={{ padding: '10px 0' }}>
-                      Digital Marketing Mastery
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Recent Activity */}
-                <div style={styles.card}>
-                  <h3 style={styles.cardTitle}>Recent Activity</h3>
-                  <ul style={{ listStyle: 'none', padding: 0 }}>
-                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                      Completed: Introduction to HTML
-                    </li>
-                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                      Started: CSS Fundamentals
-                    </li>
-                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                      Quiz passed: JavaScript Basics
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Upcoming Deadlines */}
-                <div style={styles.card}>
-                  <h3 style={styles.cardTitle}>Upcoming Deadlines</h3>
-                  <ul style={{ listStyle: 'none', padding: 0 }}>
-                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                      Assignment: CSS Project - Due in 3 days
-                    </li>
-                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                      Quiz: JavaScript Functions - Due in 5 days
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Recommended Courses */}
-                <div style={styles.card}>
-                  <h3 style={styles.cardTitle}>Recommended For You</h3>
-                  <ul style={{ listStyle: 'none', padding: 0 }}>
-                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                      Advanced React Patterns
-                    </li>
-                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                      Node.js Backend Development
-                    </li>
-                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                      Database Design Principles
-                    </li>
-                  </ul>
-                </div>
+              {/* Recent Enrollments */}
+              <div style={styles.card}>
+                <h3 style={styles.cardTitle}>Recent Courses</h3>
+                {enrollments.length === 0 ? (
+                  <p style={{ color: '#6b7280', textAlign: 'center', padding: '20px' }}>
+                    No courses enrolled yet. Browse courses to get started!
+                  </p>
+                ) : (
+                  <div>
+                    {enrollments.slice(0, 3).map(enrollment => (
+                      <div key={enrollment.id} style={{ 
+                        padding: '10px 0', 
+                        borderBottom: '1px solid #e5e7eb',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}>
+                        <div>
+                          <div style={{ fontWeight: '500' }}>{enrollment.course.title}</div>
+                          <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                            Progress: {enrollment.video_progress}%
+                            {enrollment.video_completed && ' ✅ Completed'}
+                          </div>
+                        </div>
+                        <button 
+                          onClick={() => setActiveTab('my-courses')}
+                          style={{
+                            padding: '6px 12px',
+                            backgroundColor: '#4f46e5',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '12px'
+                          }}
+                        >
+                          Continue
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
 
           {activeTab === 'my-courses' && (
-            <div style={styles.card}>
-              <h3 style={styles.cardTitle}>My Enrolled Courses</h3>
-              <p>Your enrolled courses will appear here. Browse courses to get started!</p>
-              <div style={{ padding: '20px', backgroundColor: '#f8fafc', borderRadius: '8px', marginTop: '15px' }}>
-                <h4 style={{ color: '#6b7280', marginBottom: '10px' }}>No courses enrolled yet</h4>
-                <p style={{ color: '#6b7280', fontSize: '14px' }}>
-                  Visit the "Browse Courses" tab to discover and enroll in courses.
-                </p>
-              </div>
-            </div>
+            <MyEnrolledCourses enrollments={enrollments} onRefresh={fetchEnrollments} />
           )}
 
           {activeTab === 'browse' && (
-            <CourseCatalog />
+            <CourseCatalog onEnrollmentSuccess={fetchEnrollments} />
           )}
 
           {activeTab === 'progress' && (
             <div style={styles.card}>
               <h3 style={styles.cardTitle}>My Learning Progress</h3>
-              <p>Track your course progress, certificates, and achievements here.</p>
-              <div style={{ padding: '20px', backgroundColor: '#f0f9ff', borderRadius: '8px', marginTop: '15px' }}>
-                <h4 style={{ color: '#0369a1', marginBottom: '10px' }}>Learning Analytics</h4>
-                <ul style={{ color: '#6b7280', lineHeight: '1.6' }}>
-                  <li>📊 Course completion rates</li>
-                  <li>⏱️ Time spent learning</li>
-                  <li>🏆 Achievements and badges</li>
-                  <li>📜 Certificates earned</li>
-                </ul>
-              </div>
+              {enrollments.length === 0 ? (
+                <p style={{ color: '#6b7280' }}>Enroll in courses to track your progress!</p>
+              ) : (
+                <div>
+                  {enrollments.map(enrollment => (
+                    <div key={enrollment.id} style={{ 
+                      marginBottom: '15px', 
+                      padding: '15px',
+                      backgroundColor: '#f8fafc',
+                      borderRadius: '8px'
+                    }}>
+                      <div style={{ fontWeight: '600', marginBottom: '5px' }}>
+                        {enrollment.course.title}
+                      </div>
+                      <div style={{ 
+                        width: '100%', 
+                        backgroundColor: '#e5e7eb', 
+                        borderRadius: '4px',
+                        height: '8px',
+                        marginBottom: '5px'
+                      }}>
+                        <div style={{
+                          width: `${enrollment.video_progress}%`,
+                          backgroundColor: enrollment.video_completed ? '#10b981' : '#4f46e5',
+                          height: '100%',
+                          borderRadius: '4px',
+                          transition: 'width 0.3s ease'
+                        }}></div>
+                      </div>
+                      <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                        {enrollment.video_progress}% Complete
+                        {enrollment.video_completed && ' 🎉'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

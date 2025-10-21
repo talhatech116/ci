@@ -1,10 +1,11 @@
 // resources/js/components/student/CourseCatalog.jsx
 import React, { useState, useEffect } from 'react';
 
-const CourseCatalog = () => {
+const CourseCatalog = ({ onEnrollmentSuccess }) => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [enrolling, setEnrolling] = useState(null);
 
   useEffect(() => {
     fetchCourses();
@@ -29,27 +30,61 @@ const CourseCatalog = () => {
     }
   };
 
-  const handleEnroll = async (courseId) => {
+    const handleEnroll = async (courseId) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/student/courses/${courseId}/enroll`, {
+        setEnrolling(courseId);
+        const token = localStorage.getItem('token');
+        
+        console.log('🔍 DEBUG: Starting enrollment process...');
+        console.log('🔍 DEBUG: Course ID:', courseId);
+        console.log('🔍 DEBUG: Token exists:', !!token);
+        
+        if (!token) {
+        alert('Please log in to enroll in courses.');
+        return;
+        }
+
+        console.log('🔍 DEBUG: Making API call to:', `/api/student/courses/${courseId}/enroll`);
+        
+        const response = await fetch(`/api/student/courses/${courseId}/enroll`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
         }
-      });
+        });
 
-      if (response.ok) {
-        alert('Successfully enrolled in the course!');
-      } else {
-        alert('Failed to enroll in the course.');
-      }
+        console.log('🔍 DEBUG: Response status:', response.status);
+        console.log('🔍 DEBUG: Response ok:', response.ok);
+
+        const data = await response.json();
+        console.log('🔍 DEBUG: Response data:', data);
+
+        if (response.ok) {
+        console.log('🔍 DEBUG: Enrollment successful!');
+        alert('🎉 Successfully enrolled! You can now watch the course video.');
+        
+        // Update the course to show enrolled status
+        setCourses(courses.map(course => 
+            course.id === courseId ? { ...course, is_enrolled: true } : course
+        ));
+        
+        // Notify parent component to refresh enrollments
+        if (onEnrollmentSuccess) {
+            onEnrollmentSuccess();
+        }
+        } else {
+        console.log('🔍 DEBUG: Enrollment failed with message:', data.message);
+        alert(data.message || 'Failed to enroll in the course.');
+        }
     } catch (error) {
-      console.error('Error enrolling:', error);
-      alert('Error enrolling in course.');
+        console.error('🔍 DEBUG: Error in catch block:', error);
+        console.error('🔍 DEBUG: Error message:', error.message);
+        alert('Error enrolling in course. Please try again.');
+    } finally {
+        setEnrolling(null);
     }
-  };
+    };
 
   const styles = {
     container: {
@@ -148,6 +183,28 @@ const CourseCatalog = () => {
       fontSize: '14px',
       fontWeight: '600',
       transition: 'all 0.3s ease'
+    },
+    enrolledButton: {
+      width: '100%',
+      padding: '12px',
+      backgroundColor: '#10b981',
+      color: 'white',
+      border: 'none',
+      borderRadius: '6px',
+      fontSize: '14px',
+      fontWeight: '600',
+      cursor: 'default'
+    },
+    disabledButton: {
+      width: '100%',
+      padding: '12px',
+      backgroundColor: '#9ca3af',
+      color: 'white',
+      border: 'none',
+      borderRadius: '6px',
+      fontSize: '14px',
+      fontWeight: '600',
+      cursor: 'not-allowed'
     },
     loading: {
       textAlign: 'center',
@@ -251,15 +308,33 @@ const CourseCatalog = () => {
                 }}>
                   {course.category}
                 </span>
+                {course.video_url && (
+                  <span style={{
+                    ...styles.badge,
+                    backgroundColor: '#fef3c7',
+                    color: '#92400e'
+                  }}>
+                    🎥 Video Course
+                  </span>
+                )}
               </div>
 
-              <div style={styles.price}>${course.price}</div>
+              <div style={styles.price}>
+                {course.price > 0 ? `$${course.price}` : 'Free'}
+              </div>
               
               <button 
-                style={styles.enrollButton}
+                style={
+                  course.is_enrolled ? styles.enrolledButton :
+                  enrolling === course.id ? styles.disabledButton : 
+                  styles.enrollButton
+                }
                 onClick={() => handleEnroll(course.id)}
+                disabled={course.is_enrolled || enrolling === course.id}
               >
-                Enroll Now
+                {course.is_enrolled ? '✅ Enrolled' : 
+                 enrolling === course.id ? 'Enrolling...' : 
+                 'Enroll Now'}
               </button>
             </div>
           ))}

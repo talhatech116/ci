@@ -27,4 +27,19 @@ class Course extends Model
     {
         return $this->belongsTo(User::class, 'instructor_id');
     }
+
+    public function enrollments()
+    {
+        return $this->hasMany(Enrollment::class);
+    }
+
+    // Helper method to check if a user is enrolled in this course
+    public function isEnrolled($userId = null)
+    {
+        if (!$userId && auth()->check()) {
+            $userId = auth()->id();
+        }
+        
+        return $this->enrollments()->where('student_id', $userId)->exists();
+    }
 }
