@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboard;
 use App\Http\Controllers\Instructor\DashboardController as InstructorDashboard;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
+use App\Http\Controllers\Instructor\InstructorController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -25,6 +26,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('instructor')->middleware('instructor')->group(function () {
         Route::get('/dashboard', [InstructorDashboard::class, 'index']);
         Route::put('/profile', [InstructorDashboard::class, 'updateProfile']);
+        Route::post('/courses', [InstructorController::class, 'store']);
+        Route::get('/courses', [InstructorController::class, 'index']);
     });
 
     // Admin routes

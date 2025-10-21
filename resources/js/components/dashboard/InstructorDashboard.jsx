@@ -1,11 +1,13 @@
 // resources/js/components/dashboard/InstructorDashboard.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import CreateCourse from '../instructor/CreateCourse';
 
 const InstructorDashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('overview');
 
   const handleLogout = async () => {
     await logout();
@@ -133,6 +135,37 @@ const InstructorDashboard = () => {
       cursor: 'pointer',
       fontWeight: '500',
       marginTop: '15px'
+    },
+    // NEW STYLES FOR TABS
+    tabContainer: {
+      display: 'flex',
+      gap: '10px',
+      marginBottom: '30px',
+      borderBottom: '1px solid #e5e7eb',
+      paddingBottom: '10px'
+    },
+    tab: {
+      padding: '12px 24px',
+      border: 'none',
+      backgroundColor: 'transparent',
+      cursor: 'pointer',
+      borderRadius: '8px 8px 0 0',
+      fontWeight: '500',
+      color: '#6b7280',
+      transition: 'all 0.3s ease'
+    },
+    activeTab: {
+      padding: '12px 24px',
+      border: 'none',
+      backgroundColor: '#059669',
+      color: 'white',
+      cursor: 'pointer',
+      borderRadius: '8px 8px 0 0',
+      fontWeight: '600',
+      transition: 'all 0.3s ease'
+    },
+    tabContent: {
+      minHeight: '400px'
     }
   };
 
@@ -169,92 +202,148 @@ const InstructorDashboard = () => {
           </p>
         </div>
 
-        {/* Stats Overview */}
-        <div style={styles.statsGrid}>
-          <div style={styles.statCard}>
-            <div style={styles.statNumber}>8</div>
-            <div style={styles.statLabel}>Published Courses</div>
-          </div>
-          <div style={styles.statCard}>
-            <div style={styles.statNumber}>1,247</div>
-            <div style={styles.statLabel}>Total Students</div>
-          </div>
-          <div style={styles.statCard}>
-            <div style={styles.statNumber}>4.8</div>
-            <div style={styles.statLabel}>Average Rating</div>
-          </div>
-          <div style={styles.statCard}>
-            <div style={styles.statNumber}>$3,458</div>
-            <div style={styles.statLabel}>Total Earnings</div>
-          </div>
+        {/* TAB NAVIGATION */}
+        <div style={styles.tabContainer}>
+          <button 
+            onClick={() => setActiveTab('overview')}
+            style={activeTab === 'overview' ? styles.activeTab : styles.tab}
+          >
+            Overview
+          </button>
+          <button 
+            onClick={() => setActiveTab('my-courses')}
+            style={activeTab === 'my-courses' ? styles.activeTab : styles.tab}
+          >
+            My Courses
+          </button>
+          <button 
+            onClick={() => setActiveTab('create-course')}
+            style={activeTab === 'create-course' ? styles.activeTab : styles.tab}
+          >
+            Create Course
+          </button>
+          <button 
+            onClick={() => setActiveTab('analytics')}
+            style={activeTab === 'analytics' ? styles.activeTab : styles.tab}
+          >
+            Analytics
+          </button>
         </div>
 
-        {/* Content Grid */}
-        <div style={styles.grid}>
-          {/* Course Management */}
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Course Management</h3>
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              <li style={{ padding: '10px 0', borderBottom: '1px solid #e5e7eb' }}>
-                Web Development Bootcamp (1,042 students)
-              </li>
-              <li style={{ padding: '10px 0', borderBottom: '1px solid #e5e7eb' }}>
-                React Masterclass (892 students)
-              </li>
-              <li style={{ padding: '10px 0' }}>
-                Node.js Advanced Patterns (315 students)
-              </li>
-            </ul>
-            <button style={styles.createBtn}>+ Create New Course</button>
-          </div>
+        {/* TAB CONTENT */}
+        <div style={styles.tabContent}>
+          {activeTab === 'overview' && (
+            <div>
+              {/* Stats Overview */}
+              <div style={styles.statsGrid}>
+                <div style={styles.statCard}>
+                  <div style={styles.statNumber}>8</div>
+                  <div style={styles.statLabel}>Published Courses</div>
+                </div>
+                <div style={styles.statCard}>
+                  <div style={styles.statNumber}>1,247</div>
+                  <div style={styles.statLabel}>Total Students</div>
+                </div>
+                <div style={styles.statCard}>
+                  <div style={styles.statNumber}>4.8</div>
+                  <div style={styles.statLabel}>Average Rating</div>
+                </div>
+                <div style={styles.statCard}>
+                  <div style={styles.statNumber}>$3,458</div>
+                  <div style={styles.statLabel}>Total Earnings</div>
+                </div>
+              </div>
 
-          {/* Student Engagement */}
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Student Engagement</h3>
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                15 new enrollments today
-              </li>
-              <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                23 pending assignments to grade
-              </li>
-              <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                5 student questions awaiting response
-              </li>
-            </ul>
-          </div>
+              {/* Content Grid */}
+              <div style={styles.grid}>
+                {/* Course Management */}
+                <div style={styles.card}>
+                  <h3 style={styles.cardTitle}>Course Management</h3>
+                  <ul style={{ listStyle: 'none', padding: 0 }}>
+                    <li style={{ padding: '10px 0', borderBottom: '1px solid #e5e7eb' }}>
+                      Web Development Bootcamp (1,042 students)
+                    </li>
+                    <li style={{ padding: '10px 0', borderBottom: '1px solid #e5e7eb' }}>
+                      React Masterclass (892 students)
+                    </li>
+                    <li style={{ padding: '10px 0' }}>
+                      Node.js Advanced Patterns (315 students)
+                    </li>
+                  </ul>
+                  {/* UPDATED BUTTON - Now navigates to Create Course tab */}
+                  <button 
+                    style={styles.createBtn}
+                    onClick={() => setActiveTab('create-course')}
+                  >
+                    + Create New Course
+                  </button>
+                </div>
 
-          {/* Performance Metrics */}
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Performance Metrics</h3>
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                Completion Rate: 78%
-              </li>
-              <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                Student Satisfaction: 96%
-              </li>
-              <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                Monthly Growth: +15%
-              </li>
-            </ul>
-          </div>
+                {/* Student Engagement */}
+                <div style={styles.card}>
+                  <h3 style={styles.cardTitle}>Student Engagement</h3>
+                  <ul style={{ listStyle: 'none', padding: 0 }}>
+                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
+                      15 new enrollments today
+                    </li>
+                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
+                      23 pending assignments to grade
+                    </li>
+                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
+                      5 student questions awaiting response
+                    </li>
+                  </ul>
+                </div>
 
-          {/* Recent Reviews */}
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Recent Reviews</h3>
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                "Excellent course content!" ★★★★★
-              </li>
-              <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                "Great instructor, very helpful" ★★★★★
-              </li>
-              <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                "Learned so much, thank you!" ★★★★☆
-              </li>
-            </ul>
-          </div>
+                {/* Performance Metrics */}
+                <div style={styles.card}>
+                  <h3 style={styles.cardTitle}>Performance Metrics</h3>
+                  <ul style={{ listStyle: 'none', padding: 0 }}>
+                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
+                      Completion Rate: 78%
+                    </li>
+                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
+                      Student Satisfaction: 96%
+                    </li>
+                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
+                      Monthly Growth: +15%
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Recent Reviews */}
+                <div style={styles.card}>
+                  <h3 style={styles.cardTitle}>Recent Reviews</h3>
+                  <ul style={{ listStyle: 'none', padding: 0 }}>
+                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
+                      "Excellent course content!" ★★★★★
+                    </li>
+                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
+                      "Great instructor, very helpful" ★★★★★
+                    </li>
+                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
+                      "Learned so much, thank you!" ★★★★☆
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'my-courses' && (
+            <MyCourses />
+          )}
+
+          {activeTab === 'create-course' && (
+            <CreateCourse />
+          )}
+
+          {activeTab === 'analytics' && (
+            <div style={styles.card}>
+              <h3 style={styles.cardTitle}>Detailed Analytics</h3>
+              <p>Course performance, student progress, revenue reports will appear here.</p>
+            </div>
+          )}
         </div>
       </main>
     </div>
