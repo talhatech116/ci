@@ -36,6 +36,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/courses', [InstructorController::class, 'store']);
         Route::get('/courses', [InstructorController::class, 'index']);
         Route::delete('/courses/{course}', [InstructorController::class, 'destroy']);
+        Route::get('/instructor/dashboard/stats', [InstructorController::class, 'getStats']);
+
     });
 
     // Admin routes

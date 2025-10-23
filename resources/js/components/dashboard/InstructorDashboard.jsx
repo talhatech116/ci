@@ -1,5 +1,5 @@
 // resources/js/components/dashboard/InstructorDashboard.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import CreateCourse from '../instructor/CreateCourse';
@@ -9,6 +9,67 @@ const InstructorDashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+  const [stats, setStats] = useState({
+    publishedCourses: 0,
+    totalStudents: 0,
+    averageRating: 0,
+    totalEarnings: 0
+  });
+  const [courses, setCourses] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (activeTab === 'overview') {
+      fetchDashboardData();
+    }
+  }, [activeTab]);
+
+  const fetchDashboardData = async () => {
+  try {
+    setLoading(true);
+    const token = localStorage.getItem('token');
+
+    // Fetch instructor courses
+    const coursesResponse = await fetch('/api/instructor/courses', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      }
+    });
+
+    if (coursesResponse.ok) {
+      const coursesData = await coursesResponse.json();
+      const courses = coursesData.courses || [];
+      setCourses(courses);
+      
+      // Calculate stats from courses data (TEMPORARY FIX)
+      const publishedCourses = courses.filter(course => course.status === 'published').length;
+      const totalStudents = courses.reduce((sum, course) => sum + (course.students_count || 0), 0);
+      const totalEarnings = courses.reduce((sum, course) => {
+        return sum + (course.price * (course.students_count || 0));
+      }, 0);
+      
+      setStats({
+        publishedCourses: publishedCourses,
+        totalStudents: totalStudents,
+        averageRating: 0,
+        totalEarnings: totalEarnings
+      });
+      
+      // Get top 3 courses by student count
+      const topCourses = courses
+        .sort((a, b) => (b.students_count || 0) - (a.students_count || 0))
+        .slice(0, 3);
+      
+      setRecentActivity(topCourses);
+    }
+
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleLogout = async () => {
     await logout();
@@ -177,8 +238,52 @@ const InstructorDashboard = () => {
     },
     tabContent: {
       minHeight: '400px'
+    },
+    loading: {
+      textAlign: 'center',
+      padding: '40px',
+      color: '#6b7280'
+    },
+    emptyState: {
+      textAlign: 'center',
+      padding: '20px',
+      color: '#6b7280',
+      backgroundColor: '#f8fafc',
+      borderRadius: '8px',
+      margin: '10px 0'
     }
   };
+
+  if (loading && activeTab === 'overview') {
+    return (
+      <div style={styles.container}>
+        <header style={styles.header}>
+          <nav style={styles.nav}>
+            <div style={styles.logo}>LearnPro Instructor</div>
+            <div style={styles.userInfo}>
+              <div>
+                <div style={styles.userName}>{user?.name}</div>
+                {user?.specialization && (
+                  <div style={styles.specialization}>{user.specialization}</div>
+                )}
+              </div>
+              <button 
+                onClick={handleLogout}
+                style={styles.logoutBtn}
+              >
+                Logout
+              </button>
+            </div>
+          </nav>
+        </header>
+        <main style={styles.main}>
+          <div style={styles.loading}>
+            <h3>Loading dashboard data...</h3>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
@@ -248,19 +353,19 @@ const InstructorDashboard = () => {
               {/* Stats Overview */}
               <div style={styles.statsGrid}>
                 <div style={styles.statCard}>
-                  <div style={styles.statNumber}>8</div>
+                  <div style={styles.statNumber}>{stats.publishedCourses}</div>
                   <div style={styles.statLabel}>Published Courses</div>
                 </div>
                 <div style={styles.statCard}>
-                  <div style={styles.statNumber}>1,247</div>
+                  <div style={styles.statNumber}>{stats.totalStudents}</div>
                   <div style={styles.statLabel}>Total Students</div>
                 </div>
                 <div style={styles.statCard}>
-                  <div style={styles.statNumber}>4.8</div>
+                  <div style={styles.statNumber}>{stats.averageRating}</div>
                   <div style={styles.statLabel}>Average Rating</div>
                 </div>
                 <div style={styles.statCard}>
-                  <div style={styles.statNumber}>$3,458</div>
+                  <div style={styles.statNumber}>${stats.totalEarnings}</div>
                   <div style={styles.statLabel}>Total Earnings</div>
                 </div>
               </div>
@@ -269,18 +374,20 @@ const InstructorDashboard = () => {
               <div style={styles.grid}>
                 {/* Course Management */}
                 <div style={styles.card}>
-                  <h3 style={styles.cardTitle}>Course Management</h3>
-                  <ul style={{ listStyle: 'none', padding: 0 }}>
-                    <li style={{ padding: '10px 0', borderBottom: '1px solid #e5e7eb' }}>
-                      Web Development Bootcamp (1,042 students)
-                    </li>
-                    <li style={{ padding: '10px 0', borderBottom: '1px solid #e5e7eb' }}>
-                      React Masterclass (892 students)
-                    </li>
-                    <li style={{ padding: '10px 0' }}>
-                      Node.js Advanced Patterns (315 students)
-                    </li>
-                  </ul>
+                  <h3 style={styles.cardTitle}>Your Courses</h3>
+                  {recentActivity.length === 0 ? (
+                    <div style={styles.emptyState}>
+                      <p>No courses yet. Create your first course to get started!</p>
+                    </div>
+                  ) : (
+                    <ul style={{ listStyle: 'none', padding: 0 }}>
+                      {recentActivity.map(course => (
+                        <li key={course.id} style={{ padding: '10px 0', borderBottom: '1px solid #e5e7eb' }}>
+                          {course.title} ({course.students_count || 0} students)
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   <button 
                     style={styles.createBtn}
                     onClick={() => setActiveTab('create-course')}
@@ -289,50 +396,36 @@ const InstructorDashboard = () => {
                   </button>
                 </div>
 
-                {/* Student Engagement */}
+                {/* Recent Activity */}
                 <div style={styles.card}>
-                  <h3 style={styles.cardTitle}>Student Engagement</h3>
-                  <ul style={{ listStyle: 'none', padding: 0 }}>
-                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                      15 new enrollments today
-                    </li>
-                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                      23 pending assignments to grade
-                    </li>
-                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                      5 student questions awaiting response
-                    </li>
-                  </ul>
+                  <h3 style={styles.cardTitle}>Recent Activity</h3>
+                  {courses.length === 0 ? (
+                    <div style={styles.emptyState}>
+                      <p>No recent activity</p>
+                    </div>
+                  ) : (
+                    <ul style={{ listStyle: 'none', padding: 0 }}>
+                      {courses.slice(0, 3).map(course => (
+                        <li key={course.id} style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
+                          {course.title} - {course.status}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
 
-                {/* Performance Metrics */}
+                {/* Quick Stats */}
                 <div style={styles.card}>
-                  <h3 style={styles.cardTitle}>Performance Metrics</h3>
+                  <h3 style={styles.cardTitle}>Quick Stats</h3>
                   <ul style={{ listStyle: 'none', padding: 0 }}>
                     <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                      Completion Rate: 78%
+                      Total Courses: {courses.length}
                     </li>
                     <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                      Student Satisfaction: 96%
+                      Published: {courses.filter(c => c.status === 'published').length}
                     </li>
                     <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                      Monthly Growth: +15%
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Recent Reviews */}
-                <div style={styles.card}>
-                  <h3 style={styles.cardTitle}>Recent Reviews</h3>
-                  <ul style={{ listStyle: 'none', padding: 0 }}>
-                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                      "Excellent course content!" ★★★★★
-                    </li>
-                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                      "Great instructor, very helpful" ★★★★★
-                    </li>
-                    <li style={{ padding: '8px 0', fontSize: '14px', color: '#6b7280' }}>
-                      "Learned so much, thank you!" ★★★★☆
+                      Draft: {courses.filter(c => c.status === 'draft').length}
                     </li>
                   </ul>
                 </div>
@@ -351,16 +444,24 @@ const InstructorDashboard = () => {
           {activeTab === 'analytics' && (
             <div style={styles.card}>
               <h3 style={styles.cardTitle}>Detailed Analytics</h3>
-              <p>Course performance, student progress, revenue reports will appear here.</p>
-              <div style={{ marginTop: '20px', padding: '20px', backgroundColor: '#f8fafc', borderRadius: '8px' }}>
-                <h4 style={{ marginBottom: '10px' }}>Coming Soon Features:</h4>
-                <ul style={{ color: '#6b7280', lineHeight: '1.6' }}>
-                  <li>📊 Student progress analytics</li>
-                  <li>💰 Revenue reports and insights</li>
-                  <li>📈 Course performance metrics</li>
-                  <li>🎯 Engagement tracking</li>
-                </ul>
-              </div>
+              {courses.length === 0 ? (
+                <div style={styles.emptyState}>
+                  <p>Create courses to see analytics data</p>
+                </div>
+              ) : (
+                <div>
+                  <p>Course performance, student progress, revenue reports will appear here.</p>
+                  <div style={{ marginTop: '20px', padding: '20px', backgroundColor: '#f8fafc', borderRadius: '8px' }}>
+                    <h4 style={{ marginBottom: '10px' }}>Your Course Analytics:</h4>
+                    <ul style={{ color: '#6b7280', lineHeight: '1.6' }}>
+                      <li>📊 Total Courses: {courses.length}</li>
+                      <li>👥 Total Students: {stats.totalStudents}</li>
+                      <li>💰 Total Earnings: ${stats.totalEarnings}</li>
+                      <li>⭐ Average Rating: {stats.averageRating}</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

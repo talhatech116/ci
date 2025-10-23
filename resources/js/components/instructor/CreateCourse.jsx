@@ -1,6 +1,5 @@
 // resources/js/components/instructor/CreateCourse.jsx
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const CreateCourse = () => {
@@ -9,90 +8,65 @@ const CreateCourse = () => {
     description: '',
     price: 0,
     category: '',
-    level: 'beginner'
+    level: 'beginner',
+    video_url: '', // ← ADD THIS
+    video_duration: '' // ← ADD THIS
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setMessage('');
-  
-  try {
-    const token = localStorage.getItem('token');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
     
-    if (!token) {
-      setMessage('You are not authenticated. Please log in again.');
+    try {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        setMessage('You are not authenticated. Please log in again.');
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch('/api/instructor/courses', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(courseData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to create course');
+      }
+
+      setMessage('✅ Course created successfully!');
+      
+      // Reset form
+      setCourseData({ 
+        title: '', 
+        description: '', 
+        price: 0, 
+        category: '', 
+        level: 'beginner',
+        video_url: '', // ← Reset
+        video_duration: '' // ← Reset
+      });
+
+    } catch (error) {
+      console.error('Error creating course:', error);
+      setMessage(error.message || 'An unexpected error occurred.');
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const response = await fetch('/api/instructor/courses', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-      body: JSON.stringify(courseData)
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      // Handle different HTTP status codes
-      if (response.status === 422 && data.errors) {
-        // Validation errors
-        const errorMessages = Object.values(data.errors).flat().join(', ');
-        throw new Error(`Validation error: ${errorMessages}`);
-      } else {
-        throw new Error(data.message || `HTTP error! status: ${response.status}`);
-      }
-    }
-
-    setMessage('Course created successfully!');
-    
-    // Reset form
-    setCourseData({ 
-      title: '', 
-      description: '', 
-      price: 0, 
-      category: '', 
-      level: 'beginner' 
-    });
-
-  } catch (error) {
-    console.error('Error creating course:', error);
-    
-    // Handle different error types
-    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-      setMessage('Network error. Please check your connection and try again.');
-    } else if (error.message.includes('Validation error')) {
-      setMessage(error.message);
-    } else if (error.message.includes('HTTP error')) {
-      const status = error.message.split('status: ')[1];
-      if (status === '403') {
-        setMessage('Access forbidden. You may not have instructor permissions.');
-      } else if (status === '401') {
-        setMessage('Authentication failed. Please log in again.');
-      } else {
-        setMessage(error.message);
-      }
-    } else {
-      setMessage(error.message || 'An unexpected error occurred. Please try again.');
-    }
-  } finally {
-    setLoading(false);
-  }
-};
-
-  const handleBackToDashboard = () => {
-    navigate('/instructor/dashboard');
   };
 
+  // Add these styles for the new fields
   const styles = {
     form: {
       maxWidth: '600px',
@@ -196,6 +170,12 @@ const CreateCourse = () => {
     },
     fieldGroup: {
       marginBottom: '15px'
+    },
+    helpText: {
+      color: '#6b7280',
+      fontSize: '12px',
+      marginTop: '5px',
+      fontStyle: 'italic'
     }
   };
 
@@ -225,6 +205,38 @@ const CreateCourse = () => {
             style={styles.textarea}
             required
           />
+        </div>
+
+        {/* ✅ VIDEO URL FIELD */}
+        <div style={styles.fieldGroup}>
+          <label style={styles.label}>Video URL *</label>
+          <input
+            type="url"
+            placeholder="https://www.youtube.com/embed/VIDEO_ID or https://example.com/video.mp4"
+            value={courseData.video_url}
+            onChange={(e) => setCourseData({...courseData, video_url: e.target.value})}
+            style={styles.input}
+            required
+          />
+          <div style={styles.helpText}>
+            For YouTube: Use embed URL format: https://www.youtube.com/embed/VIDEO_ID
+          </div>
+        </div>
+
+        {/* ✅ VIDEO DURATION FIELD */}
+        <div style={styles.fieldGroup}>
+          <label style={styles.label}>Video Duration *</label>
+          <input
+            type="text"
+            placeholder="e.g., 2:30, 1 hour 15 min, 45 minutes"
+            value={courseData.video_duration}
+            onChange={(e) => setCourseData({...courseData, video_duration: e.target.value})}
+            style={styles.input}
+            required
+          />
+          <div style={styles.helpText}>
+            Enter duration in any format: "2:30", "1 hour 15 min", "45 minutes"
+          </div>
         </div>
         
         <div style={styles.fieldGroup}>
@@ -269,7 +281,7 @@ const CreateCourse = () => {
         <div style={styles.buttonContainer}>
           <button 
             type="button"
-            onClick={handleBackToDashboard}
+            onClick={() => navigate('/instructor/dashboard')}
             style={styles.backButton}
             disabled={loading}
           >
