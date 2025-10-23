@@ -14,8 +14,8 @@ class Course extends Model
         'category',
         'level',
         'thumbnail',
-        'video_url',        // ← MAKE SURE THIS IS HERE
-        'video_duration',   // ← AND THIS
+        'video_url',
+        'video_duration',
         'status'
     ];
 
@@ -23,17 +23,19 @@ class Course extends Model
         'status' => 'draft'
     ];
 
-    // ... rest of your model code remains the same
+    // Relationship with instructor
     public function instructor()
     {
         return $this->belongsTo(User::class, 'instructor_id');
     }
 
+    // Relationship with enrollments
     public function enrollments()
     {
         return $this->hasMany(Enrollment::class);
     }
 
+    // Helper method to check if a user is enrolled in this course
     public function isEnrolled($userId = null)
     {
         if (!$userId && auth()->check()) {
@@ -43,12 +45,14 @@ class Course extends Model
         return $this->enrollments()->where('student_id', $userId)->exists();
     }
 
+    // Relationship with students through enrollments
     public function students()
     {
         return $this->belongsToMany(User::class, 'enrollments', 'course_id', 'student_id')
                     ->withTimestamps();
     }
 
+    // Count of students (convenience method)
     public function getStudentsCountAttribute()
     {
         return $this->enrollments()->count();

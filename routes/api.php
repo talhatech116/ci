@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/courses/{course}/enroll', [EnrollmentController::class, 'enroll']);
         Route::get('/enrollments', [EnrollmentController::class, 'myEnrollments']);
         Route::put('/courses/{course}/progress', [EnrollmentController::class, 'updateProgress']);
+        Route::get('/courses/{courseId}/watch', [CourseController::class, 'getCourseVideo']);
     });
 
     // Instructor routes
@@ -36,7 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/courses', [InstructorController::class, 'store']);
         Route::get('/courses', [InstructorController::class, 'index']);
         Route::delete('/courses/{course}', [InstructorController::class, 'destroy']);
-        Route::get('/instructor/dashboard/stats', [InstructorController::class, 'getStats']);
+        Route::get('/dashboard/stats', [InstructorController::class, 'getStats']);
 
     });
 

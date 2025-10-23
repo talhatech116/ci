@@ -1,6 +1,5 @@
 // resources/js/components/instructor/MyCourses.jsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 
 const MyCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -11,47 +10,47 @@ const MyCourses = () => {
     fetchMyCourses();
   }, []);
 
-    const fetchMyCourses = async () => {
+  const fetchMyCourses = async () => {
     try {
-        setLoading(true);
-        const token = localStorage.getItem('token');
-        
-        console.log('Fetching courses...'); // Debug
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      
+      console.log('Fetching courses...'); // Debug
 
-        const response = await fetch('/api/instructor/courses', {
+      const response = await fetch('/api/instructor/courses', {
         headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
         }
-        });
+      });
 
-        console.log('Response status:', response.status); // Debug
+      console.log('Response status:', response.status); // Debug
 
-        if (response.status === 403) {
+      if (response.status === 403) {
         throw new Error('You do not have instructor permissions.');
-        }
+      }
 
-        if (response.status === 401) {
+      if (response.status === 401) {
         throw new Error('Please log in again.');
-        }
+      }
 
-        if (!response.ok) {
+      if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
-        }
+      }
 
-        const data = await response.json();
-        console.log('Courses data:', data); // Debug
-        
-        setCourses(data.courses || []);
-        
+      const data = await response.json();
+      console.log('Courses data:', data); // Debug
+      
+      setCourses(data.courses || []);
+      
     } catch (error) {
-        console.error('Error fetching courses:', error);
-        setError(error.message);
+      console.error('Error fetching courses:', error);
+      setError(error.message);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-    };
+  };
 
   const handleDeleteCourse = async (courseId) => {
     if (!window.confirm('Are you sure you want to delete this course?')) {
@@ -266,8 +265,11 @@ const MyCourses = () => {
     );
   }
 
-  const totalStudents = courses.reduce((sum, course) => sum + (course.students_count || 0), 0);
-  const totalRevenue = courses.reduce((sum, course) => sum + (course.revenue || 0), 0);
+  // Calculate totals - CORRECTED: This counts enrollments, not unique students
+  const totalEnrollments = courses.reduce((sum, course) => sum + (course.students_count || 0), 0);
+  const totalRevenue = courses.reduce((sum, course) => {
+    return sum + (course.price * (course.students_count || 0));
+  }, 0);
 
   return (
     <div style={styles.container}>
@@ -279,15 +281,15 @@ const MyCourses = () => {
         </div>
       </div>
 
-      {/* Stats Overview */}
+      {/* Stats Overview - CORRECTED LABELS */}
       <div style={styles.stats}>
         <div style={styles.statCard}>
           <div style={styles.statNumber}>{courses.length}</div>
           <div style={styles.statLabel}>Total Courses</div>
         </div>
         <div style={styles.statCard}>
-          <div style={styles.statNumber}>{totalStudents}</div>
-          <div style={styles.statLabel}>Total Students</div>
+          <div style={styles.statNumber}>{totalEnrollments}</div>
+          <div style={styles.statLabel}>Total Enrollments</div>
         </div>
         <div style={styles.statCard}>
           <div style={styles.statNumber}>${totalRevenue}</div>
@@ -340,6 +342,13 @@ const MyCourses = () => {
                   color: course.status === 'published' ? '#166534' : '#92400e'
                 }}>
                   {course.status}
+                </span>
+                <span style={{
+                  ...styles.badge,
+                  backgroundColor: '#f3e8ff',
+                  color: '#7c3aed'
+                }}>
+                  {course.students_count || 0} enrollments
                 </span>
               </div>
 

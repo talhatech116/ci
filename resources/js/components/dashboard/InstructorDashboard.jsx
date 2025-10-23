@@ -29,34 +29,46 @@ const InstructorDashboard = () => {
   try {
     setLoading(true);
     const token = localStorage.getItem('token');
+    
+    console.log('🔍 Starting dashboard data fetch...');
 
-    // Fetch instructor courses
+    // Fetch instructor stats from the dedicated API
+    const statsResponse = await fetch('/api/instructor/dashboard/stats', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      }
+    });
+
+    console.log('🔍 Stats response status:', statsResponse.status);
+    console.log('🔍 Stats response ok:', statsResponse.ok);
+
+    if (statsResponse.ok) {
+      const statsData = await statsResponse.json();
+      console.log('🔍 Stats data received:', statsData);
+      setStats(statsData);
+    } else {
+      console.log('❌ Stats API failed with status:', statsResponse.status);
+      // Check what the error response is
+      const errorText = await statsResponse.text();
+      console.log('❌ Stats API error response:', errorText);
+    }
+
+    // Fetch instructor courses for the course list
     const coursesResponse = await fetch('/api/instructor/courses', {
       headers: {
         'Authorization': `Bearer ${token}`,
       }
     });
 
+    console.log('🔍 Courses response status:', coursesResponse.status);
+
     if (coursesResponse.ok) {
       const coursesData = await coursesResponse.json();
+      console.log('🔍 Courses data received:', coursesData);
       const courses = coursesData.courses || [];
       setCourses(courses);
       
-      // Calculate stats from courses data (TEMPORARY FIX)
-      const publishedCourses = courses.filter(course => course.status === 'published').length;
-      const totalStudents = courses.reduce((sum, course) => sum + (course.students_count || 0), 0);
-      const totalEarnings = courses.reduce((sum, course) => {
-        return sum + (course.price * (course.students_count || 0));
-      }, 0);
-      
-      setStats({
-        publishedCourses: publishedCourses,
-        totalStudents: totalStudents,
-        averageRating: 0,
-        totalEarnings: totalEarnings
-      });
-      
-      // Get top 3 courses by student count
+      // Get top 3 courses by student count for the overview
       const topCourses = courses
         .sort((a, b) => (b.students_count || 0) - (a.students_count || 0))
         .slice(0, 3);
@@ -65,7 +77,7 @@ const InstructorDashboard = () => {
     }
 
   } catch (error) {
-    console.error('Error fetching dashboard data:', error);
+    console.error('❌ Error fetching dashboard data:', error);
   } finally {
     setLoading(false);
   }

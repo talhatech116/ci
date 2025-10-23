@@ -8,6 +8,8 @@ import Register from './components/auth/Register';
 import StudentDashboard from './components/dashboard/StudentDashboard';
 import InstructorDashboard from './components/dashboard/InstructorDashboard';
 import AdminDashboard from './components/dashboard/AdminDashboard';
+// In your App.jsx or routes file, add this route:
+import VideoPlayer from './components/student/VideoPlayer';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -97,6 +99,8 @@ function App() {
               </PublicRoute>
             } 
           />
+
+          <Route path="/student/courses/:courseId/watch" element={<VideoPlayer />} />
           
           {/* Protected Dashboard Routes */}
           <Route 

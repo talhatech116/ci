@@ -72,10 +72,9 @@ const MyEnrolledCourses = ({ enrollments, onRefresh }) => {
     }
   };
 
+  // In MyEnrolledCourses.jsx, replace the handleWatchCourse function:
   const handleWatchCourse = (courseId) => {
-    // We'll implement the video player in the next step
-    alert(`Video player for course ${courseId} will be implemented next!`);
-    // navigate(`/course/${courseId}/watch`);
+    navigate(`/student/courses/${courseId}/watch`);
   };
 
   if (enrollments.length === 0) {
